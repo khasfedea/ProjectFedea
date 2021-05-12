@@ -31,7 +31,6 @@ if(CheckPostSet('log-in')) {
                     // If password matches the hashed password
                     if(password_verify($password, $hashed_password)) {
                         // Start session and forward to main page.
-                        session_start();
                         $_SESSION["loggedin"] = true;
                         $_SESSION["id"] = $id;
                         $_SESSION["email"] = $email;
@@ -76,7 +75,7 @@ if(CheckPostSet('log-in')) {
         </tr>
         <tr>
             <td><button class="login-button" name="log-in">Log In</button></td>
-            <td><a href="register.php"><button type="button" class="login-toggle">Sign Up</button></a>
+            <td><a href="register.php" class="login-toggle">Sign Up</a>
         </tr>
     </table>
     <span class="invalid-feedback"><?php echo $login_err ?></span>

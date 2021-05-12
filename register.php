@@ -84,7 +84,7 @@ if(CheckPostSet("register")) {
         </tr>
         <tr>
             <td><button class="login-button" name="register">Sign Up</button></td>
-            <td><a href="login.php"><button type="button" class="login-toggle">Log In</button></a>
+            <td><a href="login.php" class="login-toggle">Log In</a>
         </tr>
     </table>
     <span class="invalid-feedback"><?php echo $register_err ?></span>
