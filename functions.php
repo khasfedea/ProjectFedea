@@ -59,32 +59,145 @@ function handleQueryError($link){
     }
     return $error_msg;
 }
-class Poster {
-    public $SID;
-    public $avatar;
-    public $name;
-}
-class Comments {
-    public $id;
-    public $poster;
-    public $timestamp;
-    public $content;
-    public $likeCount;
-    public function __construct(){
-        $this->poster = new Poster;
+class User {
+    public $student_id;
+    public $firstName;
+    public $lastName;
+    public $dateOfBirth;
+    public $email;
+    public $avatarSrc;
+    public $friends;
+    public $privacy;
+
+    public function __construct($student_id, $issuer_id){
+        global $link;
+        $authorized = true;
+        $this->student_id = $student_id;
+        $sql = "
+            SELECT firstName, lastName, avatarSrc, privacy FROM users WHERE student_id = ?;
+        ";
+        $stmt = mysqli_prepare($link, $sql);
+        mysqli_stmt_bind_param($stmt, "s", $student_id);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_store_result($stmt);
+        mysqli_stmt_bind_result($stmt, $this->firstName, $this->lastName, $this->avatarSrc, $this->privacy);
+        mysqli_stmt_fetch($stmt);
+        if($this->privacy){
+            $sql = "SELECT friendedUser FROM friendship WHERE firstUser = ? AND friendedUser = ?;";
+            $stmt = mysqli_prepare($link, $sql);
+            mysqli_stmt_bind_param($stmt, "ss", $student_id, $issuer_id);
+            mysqli_stmt_execute($stmt);
+            mysqli_stmt_store_result($stmt);
+            // Friendship status
+            $authorized = mysqli_stmt_num_rows($stmt) == 1;
+        }
+        if($authorized){
+            $this->friends = array();
+            $sql = "SELECT friendedUser FROM friendship WHERE firstUser = ?;";
+            $stmt = mysqli_prepare($link, $sql);
+            mysqli_stmt_bind_param($stmt, "s", $student_id);
+            mysqli_stmt_execute($stmt);
+            mysqli_stmt_store_result($stmt);
+            mysqli_stmt_bind_result($stmt, $this->friends);
+            mysqli_stmt_fetch($stmt);
+
+            $sql = "SELECT dateOfBirth, email FROM users WHERE student_id = ?;";
+            $stmt = mysqli_prepare($link, $sql);
+            mysqli_stmt_bind_param($stmt, "s", $student_id);
+            mysqli_stmt_execute($stmt);
+            mysqli_stmt_store_result($stmt);
+            mysqli_stmt_bind_result($stmt, $this->dateOfBirth, $this->email);
+            mysqli_stmt_fetch($stmt);
+        }
     }
 }
-class PostTemplate {
+class LikedComment {
+    public $liker;
+    public $liked;
+
+    public function __construct($id){
+        global $link;
+        $sql = "SELECT liked FROM liked_comments WHERE liker = ?;";
+        $stmt = mysqli_prepare($link, $sql);
+        mysqli_stmt_bind_param($stmt, "s", $id);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_store_result($stmt);
+        mysqli_stmt_bind_result($stmt, $this->liked);
+    }
+}
+class Comment {
+    public $id;
+    public $post_id;
+    public $commenter;
+    public $comment;
+    public $timestamp;
+
+    public function __construct($id){
+        global $link;
+        $this->id = $id;
+        $sql = "SELECT post_id, commenter_id, comment, timestamp FROM comments WHERE id = ?;";
+        $stmt = mysqli_prepare($link, $sql);
+        mysqli_stmt_bind_param($stmt, "s", $id);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_store_result($stmt);
+        mysqli_stmt_bind_result($stmt, $this->post_id, $this->commenter, $this->comment, $this->timestamp);
+        mysqli_stmt_fetch($stmt);
+        $this->commenter = new User($this->commenter, $_SESSION["id"]);
+    }
+    public function getLikeCount(){
+        global $link;
+        $sql = "SELECT liker FROM liked_comments WHERE liked = ?;";
+        $stmt = mysqli_prepare($link, $sql);
+        mysqli_stmt_bind_param($stmt, "s", $this->id);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_store_result($stmt);
+        return mysqli_stmt_num_rows($stmt);
+    }
+}
+class Post {
     public $id;
     public $poster;
-    public $timestamp;
-    public $content;
+    public $post;
     public $image;
-    public $likeCount;
+    public $timestamp;
     public $comments;
-    public function __construct(){
-        $this->poster = new Poster;
+
+    public function __construct($id, $issuer){
+        global $link;
+        $this->id = $id;
+        $sql = "SELECT poster_id, post, image, timestamp FROM posts WHERE id = ?;";
+        $stmt = mysqli_prepare($link, $sql);
+        mysqli_stmt_bind_param($stmt, "s", $id);
+        mysqli_stmt_execute($stmt);
+        echo mysqli_error($link);
+        mysqli_stmt_store_result($stmt);
+        mysqli_stmt_bind_result($stmt, $this->poster, $this->post, $this->image, $this->timestamp);
+        mysqli_stmt_fetch($stmt);
+        $this->poster = new User($this->poster, $issuer);
+
+        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         $this->comments = array();
+        $comment_ids = array();
+        $sql = "SELECT id FROM comments WHERE post_id = ?;";
+        $stmt = mysqli_prepare($link, $sql);
+        mysqli_stmt_bind_param($stmt, "s", $id);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_bind_result($stmt, $row);
+        while(mysqli_stmt_fetch($stmt)) {
+            $comment_ids[] = $row;
+        }
+        foreach($comment_ids as $comment_id){
+            $this->comments[] = new Comment($comment_id);
+        }
+    }
+    public function getLikeCount(){
+        global $link;
+        $sql = "SELECT liker FROM liked_posts WHERE liked = ?;";
+        $stmt = mysqli_prepare($link, $sql);
+        mysqli_stmt_bind_param($stmt, "s", $this->id);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_store_result($stmt);
+        return mysqli_stmt_num_rows($stmt);
     }
     public function getCommentCount(){
         return count($this->comments);
@@ -93,76 +206,80 @@ class PostTemplate {
         global $link;
         echo '<div class="post" id="'.$this->id.'">'.PHP_EOL;
         echo '<div class="poster">'.PHP_EOL.'<div class="identification">'.PHP_EOL;
-        echo '<img class="avatar" src="'.$this->poster->avatar.'"/>'.PHP_EOL;
-        echo '<span class="name">'.$this->poster->name.'</span>'.PHP_EOL;
-        echo '<span class="SID">'.$this->poster->SID.'</span>'.PHP_EOL.'</div>'.PHP_EOL;
+        echo '<img class="avatar" src="'.$this->poster->avatarSrc.'"/>'.PHP_EOL;
+        echo '<span class="name">'.$this->poster->firstName.' '.$this->poster->lastName.'</span>'.PHP_EOL;
+        echo '<span class="SID">'.$this->poster->student_id.'</span>'.PHP_EOL.'</div>'.PHP_EOL;
         echo '<span class="timestamp">'.$this->timestamp.'</span>'.PHP_EOL;
         echo '</div>'.PHP_EOL.'<div class="content">'.PHP_EOL.'<p>'.PHP_EOL;
-        echo $this->content.PHP_EOL.'</p>'.PHP_EOL;
+        echo $this->post.PHP_EOL.'</p>'.PHP_EOL;
         echo '<img class="content-image" src="'.$this->image.'"/>'.PHP_EOL;
         echo '<div class="likes">'.PHP_EOL;
-        echo '<a class="like-button" href="likePost('.$this->id.');">Like</a>'.PHP_EOL;
-        echo '<span class="like-count">'.$this->likeCount.'</span>'.PHP_EOL;
+        echo '<a class="like-button" href="#likePost('.$this->id.');">Like</a>'.PHP_EOL;
+        echo '<span class="like-count">'.$this->getLikeCount().'</span>'.PHP_EOL;
         echo '<a class="comment-button" href="showComments('.$this->id.');">Comment</a>'.PHP_EOL;
         echo '<span class="comment-count">'.$this->getCommentCount().'</span>'.PHP_EOL;
         echo '</div>'.PHP_EOL.'</div>'.PHP_EOL.'<div class="messages">'.PHP_EOL;
         foreach($this->comments as $comment){
             echo '<div class="message" id="'.$comment->id.'">'.PHP_EOL;
             echo '<div class="poster">'.PHP_EOL.'<div class="identification">'.PHP_EOL;
-            echo '<img class="avatar" src="'.$comment->poster->avatar.'"/>'.PHP_EOL;
-            echo '<span class="name">'.$comment->poster->name.'</span>'.PHP_EOL;
-            echo '<span class="SID">'.$comment->poster->SID.'</span>'.PHP_EOL;
+            echo '<img class="avatar" src="'.$comment->commenter->avatarSrc.'"/>'.PHP_EOL;
+            echo '<span class="name">'.$comment->commenter->firstName.' '.$comment->commenter->lastName.'</span>'.PHP_EOL;
+            echo '<span class="SID">'.$comment->commenter->student_id.'</span>'.PHP_EOL;
             echo '</div>'.PHP_EOL;
             echo '<span class="timestamp">'.$comment->timestamp.'</span>'.PHP_EOL;
             echo '</div>'.PHP_EOL;
             echo '<div class="content">'.PHP_EOL.'<p>'.PHP_EOL;
-            echo $comment->content.PHP_EOL.'</p>'.PHP_EOL;
+            echo $comment->comment.PHP_EOL.'</p>'.PHP_EOL;
             echo '<div class="likes">'.PHP_EOL;
             echo '<a class="like-button" href="likeComment('.$comment->id.');">Like</a>'.PHP_EOL;
-            echo '<span class="like-count">'.$comment->likeCount.'</span>'.PHP_EOL;
+            echo '<span class="like-count">'.$comment->getLikeCount().'</span>'.PHP_EOL;
             echo '</div>'.PHP_EOL.'</div>'.PHP_EOL.'</div>'.PHP_EOL;
         }
         echo '<div class="post-comment">'.PHP_EOL;
         echo '<form name="post-comment" method="post">'.PHP_EOL;
-        $currentUser = getUser($_SESSION['id'], $link);
+        $currentUser = new User($_SESSION['id'], $_SESSION['id']);
         echo '<div class="identification">'.PHP_EOL;
-        echo '<img class="avatar" src="'.$currentUser->avatar.'"/>';
-        echo '<span class="name">'.$currentUser->firstName.' '.$currentUser->lastName.'</span>';
-        echo '</div>';
+        echo '<img class="avatar" src="'.$currentUser->avatarSrc.'"/>'.PHP_EOL;
+        echo '<span class="name">'.$currentUser->firstName.' '.$currentUser->lastName.'</span>'.PHP_EOL;
+        echo '</div>'.PHP_EOL;
         echo '<div class="area">'.PHP_EOL;
-        echo '<textarea placeholder="What is your opinion about this?"></textarea>'.PHP_EOL;
-        echo '<button>Submit</button>';
-        echo '</div>';
+        echo '<form type="submit" method="post">'.PHP_EOL;
+        echo '<input type="hidden" name="post-id" value="'.$this->id.'"/>'.PHP_EOL;
+        echo '<textarea name="commentText" placeholder="What is your opinion about this?"></textarea>'.PHP_EOL;
+        echo '<button name="comment-button">Submit</button>'.PHP_EOL;
+        echo '</form>'.PHP_EOL;
+        echo '</div>'.PHP_EOL;
         echo '</div>'.PHP_EOL.'</div>'.PHP_EOL.'</div>'.PHP_EOL;
     }
 }
-class User {
-    public $firstName;
-    public $lastName;
-    public $SID;
-    public $birthDate;
-    public $departmentID;
-    public $email;
-    public $location;
-    public $avatar;
-}
-function getUser($id, $link){
-    $currentUser = new User;
-    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-    $sql = "SELECT firstName, lastName, student_id, dateOfBirth, department_id, location, avatar, email from users where id = ?";
-    if($stmt = mysqli_prepare($link, $sql)) {
-        mysqli_stmt_bind_param($stmt, "s", $id);
-        if(mysqli_stmt_execute($stmt)) {
-            mysqli_stmt_store_result($stmt);
-            mysqli_stmt_bind_result($stmt, $currentUser->firstName, $currentUser->lastName,
-                $currentUser->SID,$currentUser->birthDate,$currentUser->departmentID,
-                $currentUser->location,$currentUser->avatar,$currentUser->email);
-            mysqli_stmt_fetch($stmt);
+function PostThePosts($issuer_id){
+    global $link;
+    $posts = array();
+    $friends = array();
+    $sql = "SELECT friendedUser FROM friendship WHERE firstUser = ?;";
+    $stmt = mysqli_prepare($link, $sql);
+    mysqli_stmt_bind_param($stmt, "s", $issuer_id);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_bind_result($stmt, $row);
+    while(mysqli_stmt_fetch($stmt)) {
+        $friends[] = $row;
+    }
+    mysqli_stmt_close($stmt);
+    foreach($friends as $friend){
+        $sql = "SELECT id FROM posts WHERE poster_id = ?;";
+        $stmt = mysqli_prepare($link, $sql);
+        mysqli_stmt_bind_param($stmt, "s", $friend);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_bind_result($stmt, $row);
+        while(mysqli_stmt_fetch($stmt)){
+            $post_ids[] = $row;
         }
     }
-    if(is_null($currentUser->avatar)){
-        $currentUser->avatar = "img/avatars/default.jpg";
+    foreach($post_ids as $post_id){
+        $posts[] = new Post($post_id, $issuer_id);
     }
-    return $currentUser;
+    foreach($posts as $post){
+        $post->printPost();
+    }
 }
 ?>

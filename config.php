@@ -3,123 +3,76 @@
 define('DB_SERVER', 'localhost');
 define('DB_USERNAME', 'fedea');
 define('DB_PASSWORD', 'test');
-define('DB_NAME', 'khas');
+define('DB_NAME', 'khas1');
 // Attempt connecting
 $link = mysqli_connect(DB_SERVER, DB_USERNAME, DB_PASSWORD, DB_NAME);
 // Catch fire if you cant
 if($link === false){
     die("ERROR: Could not connect. " . mysqli_connect_error());
 }
+/*
 // Create tables if they dont exist
 $queryArray = [
-"
-CREATE TABLE IF NOT EXISTS departments(
-    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    name VARCHAR(50)
-);",
 "
 CREATE TABLE IF NOT EXISTS users(
     id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     student_id VARCHAR(50) NOT NULL UNIQUE,
     firstName VARCHAR(50) NOT NULL,
     lastName VARCHAR(50) NOT NULL,
-    email VARCHAR(50) NOT NULL UNIQUE,
-    location VARCHAR(20) NULL,
+    avatarSrc VARCHAR(255) DEFAULT 'img/avatars/default.jpg',
+    privacy BOOL DEFAULT 1,
+    email VARCHAR(75) NOT NULL UNIQUE,
     dateOfBirth DATETIME NULL,
     password VARCHAR(255) NOT NULL,
-    department_id int REFERENCES departments(id),
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);",
+);
+",
 "
-CREATE TABLE IF NOT EXISTS pages(
+CREATE TRIGGER befriend_yourself
+AFTER INSERT ON users
+FOR EACH ROW
+INSERT INTO friendship(firstUser, friendedUser) VALUES(NEW.student_id, NEW.student_id);
+",
+"
+CREATE TABLE IF NOT EXISTS friendship(
     id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    pageName VARCHAR(50) NOT NULL,
-    pageContent VARCHAR(50) NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);",
-"
-CREATE TABLE IF NOT EXISTS page_likes(
-    page_id int REFERENCES pages(id),
-    user_id int REFERENCES users(id),
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);",
+    firstUser VARCHAR(50) NOT NULL,
+    friendedUser VARCHAR(50) NOT NULL
+);
+",
 "
 CREATE TABLE IF NOT EXISTS posts(
     id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    content VARCHAR(50) NOT NULL,
-    page_id int REFERENCES pages(id),
-    user_id int REFERENCES users(id),
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);",
-"
-CREATE TABLE IF NOT EXISTS likes(
-    post_id int REFERENCES posts(id),
-    user_id int REFERENCES users(id),
-    page_id int REFERENCES pages(id),
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);",
-"
-CREATE TABLE IF NOT EXISTS photos(
-    id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    content VARCHAR(50) NOT NULL,
-    post_id int REFERENCES posts(id),
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);",
+    poster_id VARCHAR(50) NOT NULL,
+    post VARCHAR(500) NOT NULL,
+    image VARCHAR(255) NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+",
 "
 CREATE TABLE IF NOT EXISTS comments(
-    id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    content VARCHAR(50) NOT NULL,
-    post_id int REFERENCES posts(id),
-    user_id int REFERENCES users(id),
-    page_id int REFERENCES pages(id),
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);",
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    commenter_id VARCHAR(50) NOT NULL,
+    comment VARCHAR(500) NOT NULL,
+    post_id VARCHAR(500) NOT NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+",
 "
-CREATE TABLE IF NOT EXISTS news(
-    id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    title VARCHAR(50) NOT NULL,
-    content VARCHAR(50) NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);",
+CREATE TABLE IF NOT EXISTS liked_posts(
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    liker VARCHAR(50) NOT NULL,
+    liked VARCHAR(50) NOT NULL
+);
+",
 "
-CREATE TABLE IF NOT EXISTS roles(
-    id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    name VARCHAR(50) NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);",
+CREATE TABLE IF NOT EXISTS liked_comments(
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    liker VARCHAR(50) NOT NULL,
+    liked VARCHAR(50) NOT NULL
+);
 "
-CREATE TABLE IF NOT EXISTS user_has_role(
-    user_id int REFERENCES users(id),
-    role_id int REFERENCES roles(id),
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);",
-"
-CREATE TABLE IF NOT EXISTS user_groups(
-    id INT PRIMARY KEY NOT NULL AUTO_INCREMENT,
-    name VARCHAR(20) NOT NULL,
-    role_id int REFERENCES roles(id),
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);",
-"
-CREATE TABLE IF NOT EXISTS groups_has_user(
-    user_id int REFERENCES users(id),
-    group_id int REFERENCES user_groups(id),
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);",
-"
-CREATE TABLE IF NOT EXISTS permission(
-    id INT PRIMARY KEY NOT NULL,
-    name VARCHAR(50) NOT NULL,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-);",
-"
-CREATE TABLE IF NOT EXISTS role_has_permission(
-    role_id int REFERENCES roles(id),
-    permission_id int REFERENCES permission(id)
-);"
 ];
-// Iterating over all the queries, preparing and executing them one by one.
-/*
 foreach ($queryArray as &$query){
     if($stmt = mysqli_prepare($link, $query)) {
         mysqli_stmt_execute($stmt);

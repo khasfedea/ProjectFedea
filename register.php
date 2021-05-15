@@ -31,6 +31,7 @@ if(CheckPostSet("register")) {
             if(mysqli_stmt_execute($stmt)) {
                 // Redirect to login page
                 $_SESSION["loggedin"] = true;
+                $_SESSION["id"] = $id;
                 header("location: index.php");
             } else {
                 $register_err = handleQueryError($link);

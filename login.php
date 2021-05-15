@@ -16,7 +16,7 @@ if(CheckPostSet('log-in')) {
     $email = GetPostField("email", true);
     $password = GetPostField("password", true);
     // Prepare query
-    $sql = "SELECT id, email, password FROM users WHERE email = ?";
+    $sql = "SELECT student_id, email, password FROM users WHERE email = ?";
     if($stmt = mysqli_prepare($link, $sql)) {
         mysqli_stmt_bind_param($stmt, "s", $email);
         // Execute query
