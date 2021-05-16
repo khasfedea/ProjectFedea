@@ -44,17 +44,17 @@ CREATE TABLE IF NOT EXISTS users(
 );
 ",
 "
-CREATE TRIGGER befriend_yourself
-AFTER INSERT ON users
-FOR EACH ROW
-INSERT INTO friendship(firstUser, friendedUser) VALUES(NEW.student_id, NEW.student_id);
-",
-"
 CREATE TABLE IF NOT EXISTS friendship(
     id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     firstUser VARCHAR(50) NOT NULL,
     friendedUser VARCHAR(50) NOT NULL
 );
+",
+"
+CREATE TRIGGER befriend_yourself
+AFTER INSERT ON users
+FOR EACH ROW
+INSERT INTO friendship(firstUser, friendedUser) VALUES(NEW.student_id, NEW.student_id);
 ",
 "
 CREATE TABLE IF NOT EXISTS posts(

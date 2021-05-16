@@ -27,15 +27,24 @@ function likeComment(postid, commentid){
 }
 function postStatus(){
     postText = document.getElementById("postText").value;
-    $.post("handler.php",
-    {
-        post_sent: true,
-        content_field: postText,
-        image_field: null
-    },
-    function(data, status){
-        $(data).insertAfter('.post-window');
-        document.getElementById("postText").value = "";
+    if(postText.length === 0) return;
+    var form_data = new FormData();
+    var postPicture = $('#postPicture').prop('files')[0];
+    form_data.append('file', postPicture);
+    form_data.append('content_field', postText);
+    $.ajax({
+        url: 'handler.php',
+        dataType: 'text',
+        cache: false,
+        contentType: false,
+        processData: false,
+        data: form_data,
+        type: 'post',
+        success: function(response){
+            $(response).insertAfter('.post-window');
+            document.getElementById("postText").value = "";
+            document.getElementById("postPicture").value = "";
+        }
     });
 }
 function postComment(postid){

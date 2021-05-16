@@ -40,7 +40,7 @@ $currentUser = new User($_SESSION["id"], $_SESSION["id"]);
     echo '</div>'.PHP_EOL;
     echo '<textarea id="postText" placeholder="What\'s going on in your mind, '.$currentUser->firstName.'?"></textarea>'.PHP_EOL;
     echo '<div class="post-buttons">'.PHP_EOL;
-    echo '<a onclick="uploadPicture()">Add an Image</a>'.PHP_EOL;
+    echo '<input type="file" name="postPicture" id="postPicture">'.PHP_EOL;
     echo '<button onclick="postStatus()">Submit</button>'.PHP_EOL;
     echo '</div>'.PHP_EOL;
     echo '</div>'.PHP_EOL;

@@ -38,15 +38,42 @@ if(CheckPostSet("like_comment")){
         }
     }
 }
-if(CheckPostSet("post_sent")){
+if(CheckPostSet("content_field")){
     $content_field = GetPostField("content_field");
-    $image_field = GetPostField("image_field");
+    if(isset($_FILES['file'])){
+        $file_tmppath = $_FILES['file']['tmp_name'];
+        $file_info = getimagesize($file_tmppath);
+        if($file_info === false){
+            echo '<script>alert("Please upload an image.");</script>';
+            return;
+        }
+        $timestamp = time();
+        $file_path = 'img/content/'.$timestamp.'/'.$_FILES['file']['name'];
+        switch($file_info['mime']){
+            case 'image/jpeg':
+                $image = imagecreatefromjpeg($file_tmppath);
+                break;
+            case 'image/png':
+                $image = imagecreatefrompng($file_tmppath);
+                break;
+            case 'image/gif':
+                $image = imagecreatefromgif($file_tmppath);
+                break;
+            default:
+                echo '<script>alert("Please upload an image.");</script>';
+                return;
+        }
+        mkdir('img/content/'.$timestamp);
+        imagejpeg($image, $file_path, 90);
+    } else {
+        $file_path = "";
+    }
     $sql = "
     INSERT INTO posts(poster_id, post, image)
     VALUES(?, ?, ?);
     ";
     $stmt = mysqli_prepare($link, $sql);
-    mysqli_stmt_bind_param($stmt, "sss", $_SESSION["id"], $content_field, $image_field);
+    mysqli_stmt_bind_param($stmt, "sss", $_SESSION["id"], $content_field, $file_path);
     mysqli_stmt_execute($stmt);
     $post_id = mysqli_insert_id($link);
     $post = new Post($post_id, $_SESSION["id"]);
