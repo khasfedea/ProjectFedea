@@ -1,4 +1,20 @@
 <?php
+/**
+ * This file is a part of Fedea Project (https://github.com/khasfedea/FedeaProject).
+ * Copyright (C) 2021 Furkan Mudanyali, Team FEDEA.
+ * 
+ * This program is free software: you can redistribute it and/or modify  
+ * it under the terms of the GNU General Public License as published by  
+ * the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful, but 
+ * WITHOUT ANY WARRANTY; without even the implied warranty of 
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License 
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 require_once "config.php";
 $link = $GLOBALS['link'];
 // Just a fancy alias to fit in the naming convention
@@ -172,6 +188,22 @@ class Comment {
             mysqli_stmt_execute($stmt);
         }
     }
+    public function printComment(){
+        echo '<div class="message" id="'.$this->id.'">'.PHP_EOL;
+        echo '<div class="poster">'.PHP_EOL.'<div class="identification">'.PHP_EOL;
+        echo '<img class="avatar" src="'.$this->commenter->avatarSrc.'"/>'.PHP_EOL;
+        echo '<span class="name">'.$this->commenter->firstName.' '.$this->commenter->lastName.'</span>'.PHP_EOL;
+        echo '<span class="SID">'.$this->commenter->student_id.'</span>'.PHP_EOL;
+        echo '</div>'.PHP_EOL;
+        echo '<span class="timestamp">'.$this->timestamp.'</span>'.PHP_EOL;
+        echo '</div>'.PHP_EOL;
+        echo '<div class="content">'.PHP_EOL.'<p>'.PHP_EOL;
+        echo $this->comment.PHP_EOL.'</p>'.PHP_EOL;
+        echo '<div class="likes">'.PHP_EOL;
+        echo '<a class="like-button" onclick="likeComment('.$this->post_id.','.$this->id.');">Like</a>'.PHP_EOL;
+        echo '<span id="like-comment-'.$this->post_id.'-'.$this->id.'">'.$this->getLikeCount().'</span>'.PHP_EOL;
+        echo '</div>'.PHP_EOL.'</div>'.PHP_EOL.'</div>'.PHP_EOL;
+    }
 }
 class Post {
     public $id;
@@ -258,34 +290,17 @@ class Post {
         echo '<span id="comment-count-'.$this->id.'">'.$this->getCommentCount().'</span>'.PHP_EOL;
         echo '</div>'.PHP_EOL.'</div>'.PHP_EOL.'<div class="messages" id="comment-section-'.$this->id.'">'.PHP_EOL;
         foreach($this->comments as $comment){
-            echo '<div class="message" id="'.$comment->id.'">'.PHP_EOL;
-            echo '<div class="poster">'.PHP_EOL.'<div class="identification">'.PHP_EOL;
-            echo '<img class="avatar" src="'.$comment->commenter->avatarSrc.'"/>'.PHP_EOL;
-            echo '<span class="name">'.$comment->commenter->firstName.' '.$comment->commenter->lastName.'</span>'.PHP_EOL;
-            echo '<span class="SID">'.$comment->commenter->student_id.'</span>'.PHP_EOL;
-            echo '</div>'.PHP_EOL;
-            echo '<span class="timestamp">'.$comment->timestamp.'</span>'.PHP_EOL;
-            echo '</div>'.PHP_EOL;
-            echo '<div class="content">'.PHP_EOL.'<p>'.PHP_EOL;
-            echo $comment->comment.PHP_EOL.'</p>'.PHP_EOL;
-            echo '<div class="likes">'.PHP_EOL;
-            echo '<a class="like-button" onclick="likeComment('.$this->id.','.$comment->id.');">Like</a>'.PHP_EOL;
-            echo '<span id="like-comment-'.$this->id.'-'.$comment->id.'">'.$comment->getLikeCount().'</span>'.PHP_EOL;
-            echo '</div>'.PHP_EOL.'</div>'.PHP_EOL.'</div>'.PHP_EOL;
+            $comment->printComment();
         }
-        echo '<div class="post-comment">'.PHP_EOL;
-        echo '<form name="post-comment" method="post">'.PHP_EOL;
+        echo '<div class="post-comment" id="post-comment-'.$this->id.'">'.PHP_EOL;
         $currentUser = new User($_SESSION['id'], $_SESSION['id']);
         echo '<div class="identification">'.PHP_EOL;
         echo '<img class="avatar" src="'.$currentUser->avatarSrc.'"/>'.PHP_EOL;
         echo '<span class="name">'.$currentUser->firstName.' '.$currentUser->lastName.'</span>'.PHP_EOL;
         echo '</div>'.PHP_EOL;
         echo '<div class="area">'.PHP_EOL;
-        echo '<form type="submit" method="post">'.PHP_EOL;
-        echo '<input type="hidden" name="post-id" value="'.$this->id.'"/>'.PHP_EOL;
-        echo '<textarea name="commentText" placeholder="What is your opinion about this?"></textarea>'.PHP_EOL;
-        echo '<button name="comment-button">Submit</button>'.PHP_EOL;
-        echo '</form>'.PHP_EOL;
+        echo '<textarea id="commentText-'.$this->id.'" placeholder="What is your opinion about this?"></textarea>'.PHP_EOL;
+        echo '<button onclick="postComment('.$this->id.')">Submit</button>'.PHP_EOL;
         echo '</div>'.PHP_EOL;
         echo '</div>'.PHP_EOL.'</div>'.PHP_EOL.'</div>'.PHP_EOL;
     }

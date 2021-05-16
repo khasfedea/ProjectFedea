@@ -1,4 +1,20 @@
 <?php
+/**
+ * This file is a part of Fedea Project (https://github.com/khasfedea/FedeaProject).
+ * Copyright (C) 2021 Furkan Mudanyali, Team FEDEA.
+ * 
+ * This program is free software: you can redistribute it and/or modify  
+ * it under the terms of the GNU General Public License as published by  
+ * the Free Software Foundation, version 3.
+ *
+ * This program is distributed in the hope that it will be useful, but 
+ * WITHOUT ANY WARRANTY; without even the implied warranty of 
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License 
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 require_once "functions.php";
 session_start();
 if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] === false){
@@ -6,32 +22,6 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] === false){
     exit;
 }
 $currentUser = new User($_SESSION["id"], $_SESSION["id"]);
-
-if(CheckPostSet("post-button")) {
-    $sql = "
-    INSERT INTO posts(poster_id, post, image)
-    VALUES(?, ?, ?);
-    ";
-    $postText = GetPostField("postText",true);
-    $postImage = null;
-    $stmt = mysqli_prepare($link, $sql);
-    mysqli_stmt_bind_param($stmt, "sss", $_SESSION["id"], $postText, $postImage);
-    mysqli_stmt_execute($stmt);
-    mysqli_stmt_store_result($stmt);
-}
-if(CheckPostSet("comment-button")) {
-    $commentText = GetPostField("commentText", true);
-    $postId = GetPostField("post-id", true);
-    $sql = "
-    INSERT INTO comments(commenter_id, comment, post_id)
-    VALUES(?, ?, ?);
-    ";
-    mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
-    $stmt = mysqli_prepare($link, $sql);
-    mysqli_stmt_bind_param($stmt, "sss", $_SESSION["id"], $commentText, $postId);
-    mysqli_stmt_execute($stmt);
-    mysqli_stmt_store_result($stmt);
-}
 ?>
 <!DOCTYPE html>
 <html lang=en>
@@ -48,12 +38,10 @@ if(CheckPostSet("comment-button")) {
     echo '<img class="avatar" src="'.$currentUser->avatarSrc.'"/>'.PHP_EOL;
     echo '<span class="name">'.$currentUser->firstName.' '.$currentUser->lastName.'</span>'.PHP_EOL;
     echo '</div>'.PHP_EOL;
-    echo '<form method="POST" type="submit">'.PHP_EOL;
-    echo '<textarea name="postText" placeholder="What\'s going on in your mind, '.$currentUser->firstName.'?"></textarea>'.PHP_EOL;
+    echo '<textarea id="postText" placeholder="What\'s going on in your mind, '.$currentUser->firstName.'?"></textarea>'.PHP_EOL;
     echo '<div class="post-buttons">'.PHP_EOL;
-    echo '<a href="#uploadPicture()">Add an Image</a>'.PHP_EOL;
-    echo '<button name="post-button">Submit</button>'.PHP_EOL;
-    echo '</form>'.PHP_EOL;
+    echo '<a onclick="uploadPicture()">Add an Image</a>'.PHP_EOL;
+    echo '<button onclick="postStatus()">Submit</button>'.PHP_EOL;
     echo '</div>'.PHP_EOL;
     echo '</div>'.PHP_EOL;
     ?>
