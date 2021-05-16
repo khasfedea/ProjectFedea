@@ -171,9 +171,9 @@ class Comment {
     }
     public function likeComment(){
         global $link;
-        $sql = "SELECT liker FROM liked_comments WHERE liked = ?;";
+        $sql = "SELECT liker FROM liked_comments WHERE liked = ? AND liker = ?;";
         $stmt = mysqli_prepare($link, $sql);
-        mysqli_stmt_bind_param($stmt, "s", $this->id);
+        mysqli_stmt_bind_param($stmt, "ss", $this->id, $_SESSION["id"]);
         mysqli_stmt_execute($stmt);
         mysqli_stmt_store_result($stmt);
         if(mysqli_stmt_num_rows($stmt) == 1){
@@ -252,9 +252,9 @@ class Post {
     }
     public function likePost(){
         global $link;
-        $sql = "SELECT liker FROM liked_posts WHERE liked = ?;";
+        $sql = "SELECT liker FROM liked_posts WHERE liked = ? AND liker = ?;";
         $stmt = mysqli_prepare($link, $sql);
-        mysqli_stmt_bind_param($stmt, "s", $this->id);
+        mysqli_stmt_bind_param($stmt, "ss", $this->id, $_SESSION["id"]);
         mysqli_stmt_execute($stmt);
         mysqli_stmt_store_result($stmt);
         if(mysqli_stmt_num_rows($stmt) == 1){
