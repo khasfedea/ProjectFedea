@@ -225,30 +225,33 @@ body {
     justify-content: left;
 }
 .post .messages {
-    display: flex;
+    display: none;
     flex-direction: column;
 }
-.post .messages .message {
+.messagesVisible {
+    display: flex;
+}
+.message {
     border: 1px solid gray;
     border-radius: 5px;
     background-color: rgb(241, 241, 241);
     display: flex;
     flex-direction: column;
 }
-.post .messages .message .poster {
+.message .poster {
     display: flex;
     justify-content: space-between;
 }
-.post .messages .message .poster .identification {
+.message .poster .identification {
     display: flex;
     align-items: center;
 }
-.post .messages .message .content {
+.message .content {
     border: 0;
     display: flex;
     flex-direction: column;
 }
-.post .messages .message .likes {
+.message .likes {
     display: flex;
     justify-content: left;
 }

@@ -199,6 +199,25 @@ class Post {
         mysqli_stmt_store_result($stmt);
         return mysqli_stmt_num_rows($stmt);
     }
+    public function likePost(){
+        global $link;
+        $sql = "SELECT liker FROM liked_posts WHERE liked = ?;";
+        $stmt = mysqli_prepare($link, $sql);
+        mysqli_stmt_bind_param($stmt, "s", $this->id);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_store_result($stmt);
+        if(mysqli_stmt_num_rows($stmt) == 1){
+            $sql = "DELETE FROM liked_posts WHERE liker = ? AND liked = ?;";
+            $stmt = mysqli_prepare($link, $sql);
+            mysqli_stmt_bind_param($stmt, "ss", $_SESSION["id"], $this->id);
+            mysqli_stmt_execute($stmt);
+        } else {
+            $sql = "INSERT INTO liked_posts(liker, liked) VALUES(?, ?);";
+            $stmt = mysqli_prepare($link, $sql);
+            mysqli_stmt_bind_param($stmt, "ss", $_SESSION["id"], $this->id);
+            mysqli_stmt_execute($stmt);
+        }
+    }
     public function getCommentCount(){
         return count($this->comments);
     }
@@ -214,11 +233,11 @@ class Post {
         echo $this->post.PHP_EOL.'</p>'.PHP_EOL;
         echo '<img class="content-image" src="'.$this->image.'"/>'.PHP_EOL;
         echo '<div class="likes">'.PHP_EOL;
-        echo '<a class="like-button" href="#likePost('.$this->id.');">Like</a>'.PHP_EOL;
-        echo '<span class="like-count">'.$this->getLikeCount().'</span>'.PHP_EOL;
-        echo '<a class="comment-button" href="showComments('.$this->id.');">Comment</a>'.PHP_EOL;
-        echo '<span class="comment-count">'.$this->getCommentCount().'</span>'.PHP_EOL;
-        echo '</div>'.PHP_EOL.'</div>'.PHP_EOL.'<div class="messages">'.PHP_EOL;
+        echo '<a class="like-button" onclick="likePost('.$this->id.')">Like</a>'.PHP_EOL;
+        echo '<span id="like-count-'.$this->id.'">'.$this->getLikeCount().'</span>'.PHP_EOL;
+        echo '<a class="comment-button" onclick="showComments('.$this->id.');">Comments</a>'.PHP_EOL;
+        echo '<span id="comment-count-'.$this->id.'">'.$this->getCommentCount().'</span>'.PHP_EOL;
+        echo '</div>'.PHP_EOL.'</div>'.PHP_EOL.'<div class="messages" id="comment-section-'.$this->id.'">'.PHP_EOL;
         foreach($this->comments as $comment){
             echo '<div class="message" id="'.$comment->id.'">'.PHP_EOL;
             echo '<div class="poster">'.PHP_EOL.'<div class="identification">'.PHP_EOL;
@@ -278,6 +297,9 @@ function PostThePosts($issuer_id){
     foreach($post_ids as $post_id){
         $posts[] = new Post($post_id, $issuer_id);
     }
+    usort($posts, function($a, $b) {
+        return $b->id <=> $a->id;
+    });
     foreach($posts as $post){
         $post->printPost();
     }
