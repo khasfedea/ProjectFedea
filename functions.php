@@ -153,6 +153,25 @@ class Comment {
         mysqli_stmt_store_result($stmt);
         return mysqli_stmt_num_rows($stmt);
     }
+    public function likeComment(){
+        global $link;
+        $sql = "SELECT liker FROM liked_comments WHERE liked = ?;";
+        $stmt = mysqli_prepare($link, $sql);
+        mysqli_stmt_bind_param($stmt, "s", $this->id);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_store_result($stmt);
+        if(mysqli_stmt_num_rows($stmt) == 1){
+            $sql = "DELETE FROM liked_comments WHERE liker = ? AND liked = ?;";
+            $stmt = mysqli_prepare($link, $sql);
+            mysqli_stmt_bind_param($stmt, "ss", $_SESSION["id"], $this->id);
+            mysqli_stmt_execute($stmt);
+        } else {
+            $sql = "INSERT INTO liked_comments(liker, liked) VALUES(?, ?);";
+            $stmt = mysqli_prepare($link, $sql);
+            mysqli_stmt_bind_param($stmt, "ss", $_SESSION["id"], $this->id);
+            mysqli_stmt_execute($stmt);
+        }
+    }
 }
 class Post {
     public $id;
@@ -250,8 +269,8 @@ class Post {
             echo '<div class="content">'.PHP_EOL.'<p>'.PHP_EOL;
             echo $comment->comment.PHP_EOL.'</p>'.PHP_EOL;
             echo '<div class="likes">'.PHP_EOL;
-            echo '<a class="like-button" href="likeComment('.$comment->id.');">Like</a>'.PHP_EOL;
-            echo '<span class="like-count">'.$comment->getLikeCount().'</span>'.PHP_EOL;
+            echo '<a class="like-button" onclick="likeComment('.$this->id.','.$comment->id.');">Like</a>'.PHP_EOL;
+            echo '<span id="like-comment-'.$this->id.'-'.$comment->id.'">'.$comment->getLikeCount().'</span>'.PHP_EOL;
             echo '</div>'.PHP_EOL.'</div>'.PHP_EOL.'</div>'.PHP_EOL;
         }
         echo '<div class="post-comment">'.PHP_EOL;

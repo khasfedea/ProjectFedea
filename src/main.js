@@ -12,9 +12,20 @@ function likePost(id){
         document.getElementById(document_id).innerHTML = [data];
     });
 }
+function likeComment(postid, commentid){
+    $.post("handler.php",
+    {
+        like_comment: true,
+        post_id: postid,
+        comment_id: commentid
+    },
+    function(data, status){
+        comment_id = "like-comment-"+postid+"-"+commentid;
+        document.getElementById(comment_id).innerHTML = [data];
+    });
+}
 function showComments(id){
     comments_id = "comment-section-"+id;
-    console.log(document.getElementById(comments_id).className);
     if (document.getElementById(comments_id).className == "messages"){
         document.getElementById(comments_id).className += "messagesVisible";
     } else {
