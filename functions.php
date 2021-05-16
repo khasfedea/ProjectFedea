@@ -31,7 +31,7 @@ function GetIfSet($name){
 function GetPostField($name, $isRequired=false, $rowName=""){
     global $link;
     $realName = translateRegisterVariable($name);
-    $name = trim($_POST[$name]);
+    $name = htmlspecialchars(trim($_POST[$name]));
     // If not specified, use name as rowname in sql query.
     if(empty($rowName)){
         $rowName = $name;
