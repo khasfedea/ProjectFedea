@@ -9,6 +9,11 @@ function likePost(id){
     },
     function(data, status){
         document_id = "like-count-"+id;
+        if(document.getElementById(document_id).innerHTML < [data]){
+            $("#"+id+".post .content .under-post .likes .like-button").text('Unlike');
+        } else {
+            $("#"+id+".post .content .under-post .likes .like-button").text('Like');
+        }
         document.getElementById(document_id).innerHTML = [data];
     });
 }
@@ -22,6 +27,11 @@ function likeComment(postid, commentid){
     function(data, status){
         comment_id = "like-comment-"+postid+"-"+commentid;
         console.log(comment_id);
+        if(document.getElementById(comment_id).innerHTML < [data]){
+            $("#"+commentid+".message .content .under-comment .likes .like-button").text('Unlike');
+        } else {
+            $("#"+commentid+".message .content .under-comment .likes .like-button").text('Like');
+        }
         document.getElementById(comment_id).innerHTML = [data];
     });
 }
@@ -60,6 +70,7 @@ function postComment(postid){
         post_comment_id = "#post-comment-"+postid;
         comment_field_id = "commentText-"+postid;
         $(data).insertBefore(post_comment_id);
+        $("#comment-count-"+postid).text(parseInt($("#comment-count-"+postid).text()) + 1);
         document.getElementById(comment_field_id).value = "";
     });
 }
@@ -87,7 +98,7 @@ function deletePost(id){
         }
     });
 }
-function deleteComment(id){
+function deleteComment(id, post_id){
     if (!confirm("Are you sure you want to remove this comment?")){
         return;
     }
@@ -100,6 +111,7 @@ function deleteComment(id){
             alert("You are not allowed to do that.");
         } else {
             $("#"+id+".message").remove();
+            $("#comment-count-"+post_id).text(parseInt($("#comment-count-"+post_id).text()) - 1);
         }
     });
 }

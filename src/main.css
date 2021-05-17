@@ -332,7 +332,7 @@ body {
     color: rgb(206, 100, 100);
     font-weight: bold;
 }
-.under-post {
+.under-post, .under-comment {
     display: flex;
     justify-content: space-between;
     align-items: center;
