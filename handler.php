@@ -42,29 +42,10 @@ if(CheckPostSet("content_field")){
     $content_field = GetPostField("content_field");
     if(isset($_FILES['file'])){
         $file_tmppath = $_FILES['file']['tmp_name'];
-        $file_info = getimagesize($file_tmppath);
-        if($file_info === false){
-            echo '<script>alert("Please upload an image.");</script>';
-            return;
-        }
         $timestamp = time();
         $file_path = 'img/content/'.$timestamp.'/'.$_FILES['file']['name'];
-        switch($file_info['mime']){
-            case 'image/jpeg':
-                $image = imagecreatefromjpeg($file_tmppath);
-                break;
-            case 'image/png':
-                $image = imagecreatefrompng($file_tmppath);
-                break;
-            case 'image/gif':
-                $image = imagecreatefromgif($file_tmppath);
-                break;
-            default:
-                echo '<script>alert("Please upload an image.");</script>';
-                return;
-        }
         mkdir('img/content/'.$timestamp);
-        imagejpeg($image, $file_path, 90);
+        CompressImage($file_tmppath,$file_path);
     } else {
         $file_path = "";
     }
@@ -92,5 +73,39 @@ if(CheckPostSet("comment_sent")){
     $comment_id = mysqli_insert_id($link);
     $comment = new Comment($comment_id);
     echo $comment->printComment();
+}
+if(CheckPostSet("delete_comment_id")){
+    $comment_id = GetPostField("delete_comment_id");
+    $comment = new Comment($comment_id);
+    if($comment->commenter->student_id !== $_SESSION["id"]){
+        echo 'unauthorized';
+        return;
+    }
+    $sql = "
+    DELETE FROM comments WHERE id = ?;
+    ";
+    $stmt = mysqli_prepare($link, $sql);
+    mysqli_stmt_bind_param($stmt, "s", $comment_id);
+    mysqli_stmt_execute($stmt);
+}
+if(CheckPostSet("delete_post_id")){
+    $post_id = GetPostField("delete_post_id");
+    $post = new Post($post_id, $_SESSION["id"]);
+    if($post->poster->student_id !== $_SESSION["id"]){
+        echo 'unauthorized';
+        return;
+    }
+    $sql = "
+    DELETE FROM posts WHERE id = ?;
+    ";
+    $stmt = mysqli_prepare($link, $sql);
+    mysqli_stmt_bind_param($stmt, "s", $post_id);
+    mysqli_stmt_execute($stmt);
+    $sql = "
+    DELETE FROM comments WHERE post_id = ?;
+    ";
+    $stmt = mysqli_prepare($link, $sql);
+    mysqli_stmt_bind_param($stmt, "s", $post_id);
+    mysqli_stmt_execute($stmt);
 }
 ?>

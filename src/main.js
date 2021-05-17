@@ -71,3 +71,35 @@ function showComments(id){
         document.getElementById(comments_id).className = "messages";
     }
 }
+function deletePost(id){
+    if (!confirm("Are you sure you want to remove this post?")){
+        return;
+    }
+    $.post("handler.php",
+    {
+        delete_post_id: id
+    },
+    function(data, status){
+        if([data] == 'unauthorized'){
+            alert("You are not allowed to do that.");
+        } else {
+            $("#"+id+".post").remove();
+        }
+    });
+}
+function deleteComment(id){
+    if (!confirm("Are you sure you want to remove this comment?")){
+        return;
+    }
+    $.post("handler.php",
+    {
+        delete_comment_id: id
+    },
+    function(data, status){
+        if([data] == 'unauthorized'){
+            alert("You are not allowed to do that.");
+        } else {
+            $("#"+id+".message").remove();
+        }
+    });
+}

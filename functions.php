@@ -193,15 +193,20 @@ class Comment {
         echo '<div class="poster">'.PHP_EOL.'<div class="identification">'.PHP_EOL;
         echo '<img class="avatar" src="'.$this->commenter->avatarSrc.'"/>'.PHP_EOL;
         echo '<span class="name">'.$this->commenter->firstName.' '.$this->commenter->lastName.'</span>'.PHP_EOL;
-        echo '<span class="SID">'.$this->commenter->student_id.'</span>'.PHP_EOL;
+        //echo '<span class="SID">'.$this->commenter->student_id.'</span>'.PHP_EOL;
         echo '</div>'.PHP_EOL;
         echo '<span class="timestamp">'.$this->timestamp.'</span>'.PHP_EOL;
         echo '</div>'.PHP_EOL;
         echo '<div class="content">'.PHP_EOL.'<p>'.PHP_EOL;
         echo $this->comment.PHP_EOL.'</p>'.PHP_EOL;
+        echo '<div class="under-post">'.PHP_EOL;
         echo '<div class="likes">'.PHP_EOL;
         echo '<a class="like-button" onclick="likeComment('.$this->post_id.','.$this->id.');">Like</a>'.PHP_EOL;
         echo '<span id="like-comment-'.$this->post_id.'-'.$this->id.'">'.$this->getLikeCount().'</span>'.PHP_EOL;
+        echo '</div>'.PHP_EOL;
+        if($this->commenter->student_id === $_SESSION["id"]){
+            echo '<a class="remove-button" onclick="deleteComment('.$this->id.')">Delete</a>'.PHP_EOL;
+        }
         echo '</div>'.PHP_EOL.'</div>'.PHP_EOL.'</div>'.PHP_EOL;
     }
 }
@@ -278,16 +283,24 @@ class Post {
         echo '<div class="poster">'.PHP_EOL.'<div class="identification">'.PHP_EOL;
         echo '<img class="avatar" src="'.$this->poster->avatarSrc.'"/>'.PHP_EOL;
         echo '<span class="name">'.$this->poster->firstName.' '.$this->poster->lastName.'</span>'.PHP_EOL;
-        echo '<span class="SID">'.$this->poster->student_id.'</span>'.PHP_EOL.'</div>'.PHP_EOL;
+        //echo '<span class="SID">'.$this->poster->student_id.'</span>'.PHP_EOL;
+        echo '</div>'.PHP_EOL;
         echo '<span class="timestamp">'.$this->timestamp.'</span>'.PHP_EOL;
         echo '</div>'.PHP_EOL.'<div class="content">'.PHP_EOL.'<p>'.PHP_EOL;
         echo $this->post.PHP_EOL.'</p>'.PHP_EOL;
-        echo '<img class="content-image" src="'.$this->image.'"/>'.PHP_EOL;
+        if(!empty($this->image)){
+            echo '<img class="content-image" src="'.$this->image.'"/>'.PHP_EOL;
+        }
+        echo '<div class="under-post">';
         echo '<div class="likes">'.PHP_EOL;
         echo '<a class="like-button" onclick="likePost('.$this->id.')">Like</a>'.PHP_EOL;
         echo '<span id="like-count-'.$this->id.'">'.$this->getLikeCount().'</span>'.PHP_EOL;
         echo '<a class="comment-button" onclick="showComments('.$this->id.');">Comments</a>'.PHP_EOL;
         echo '<span id="comment-count-'.$this->id.'">'.$this->getCommentCount().'</span>'.PHP_EOL;
+        echo '</div>'.PHP_EOL;
+        if($this->poster->student_id === $_SESSION["id"]){
+            echo '<a class="remove-button" onclick="deletePost('.$this->id.')">Delete</a>'.PHP_EOL;
+        }
         echo '</div>'.PHP_EOL.'</div>'.PHP_EOL.'<div class="messages" id="comment-section-'.$this->id.'">'.PHP_EOL;
         foreach($this->comments as $comment){
             $comment->printComment();
@@ -337,5 +350,27 @@ function PostThePosts($issuer_id){
     foreach($posts as $post){
         $post->printPost();
     }
+}
+function CompressImage($input, $output, $quality = 90){
+    $file_info = getimagesize($input);
+    if($file_info === false){
+        echo '<script>alert("Please upload an image.");</script>';
+        return;
+    }
+    switch($file_info['mime']){
+        case 'image/jpeg':
+            $image = imagecreatefromjpeg($input);
+            break;
+        case 'image/png':
+            $image = imagecreatefrompng($input);
+            break;
+        case 'image/gif':
+            $image = imagecreatefromgif($input);
+            break;
+        default:
+            echo '<script>alert("Please upload an image.");</script>';
+            return;
+        }
+        imagejpeg($image, $output, $quality);
 }
 ?>
