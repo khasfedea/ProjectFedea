@@ -151,7 +151,7 @@ class Comment {
     public function __construct($id){
         global $link;
         $this->id = $id;
-        $sql = "SELECT post_id, commenter_id, comment, timestamp FROM comments WHERE id = ?;";
+        $sql = "SELECT post_id, commenter_id, comment, DATE_FORMAT(timestamp, '%e %b, %H:%i') FROM comments WHERE id = ?;";
         $stmt = mysqli_prepare($link, $sql);
         mysqli_stmt_bind_param($stmt, "s", $id);
         mysqli_stmt_execute($stmt);
@@ -234,7 +234,7 @@ class Post {
     public function __construct($id, $issuer){
         global $link;
         $this->id = $id;
-        $sql = "SELECT poster_id, post, image, timestamp FROM posts WHERE id = ?;";
+        $sql = "SELECT poster_id, post, image, DATE_FORMAT(timestamp, '%e %b, %H:%i') FROM posts WHERE id = ?;";
         $stmt = mysqli_prepare($link, $sql);
         mysqli_stmt_bind_param($stmt, "s", $id);
         mysqli_stmt_execute($stmt);

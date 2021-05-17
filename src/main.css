@@ -166,6 +166,9 @@ body {
     .search-form {
         width: calc(100% - 0.5em);
     }
+    .content-image {
+        width: 100%;
+    }
 }
 @media screen and (orientation: landscape) {
     .profile-button-dropdown:hover .dropdown-element {
@@ -174,6 +177,10 @@ body {
         border-radius: 0;
         top: 40px;
         z-index: 1;
+    }
+    .content-image {
+        max-height: 500px;
+        max-width: 100%;
     }
     .profile-button-dropdown:hover #element2 {
         border-radius: 0 0 5px 5px;
@@ -196,13 +203,10 @@ body {
     padding: 0;
 }
 /* ----------------------- */
-.post * {
-    margin: 0.3em;
-    padding: 0.1em;
-}
 .post {
     border-radius: 5px;
     margin: 1em 10em 1em 10em;
+    padding: 0.5em;
     display: flex;
     flex-direction: column;
     background-color: white;
@@ -211,6 +215,7 @@ body {
 .post .poster {
     display: flex;
     justify-content: space-between;
+    align-items: center;
 }
 .post .poster .identification {
     display: flex;
@@ -222,10 +227,16 @@ body {
     box-sizing: border-box;
     background-color: rgb(241, 241, 241);
     border: 1px solid gray;
+    border-radius: 5px;
+    padding: 0.5em;
+    margin-bottom: 0.5em;
 }
 .post .content .likes {
     display: flex;
     justify-content: left;
+}
+.post .content .likes * {
+    padding: 0.2em;
 }
 .post .messages {
     display: none;
@@ -240,19 +251,28 @@ body {
     background-color: rgb(241, 241, 241);
     display: flex;
     flex-direction: column;
+    padding: 0.5em;
+    margin-bottom: 0.5em;
 }
 .message .poster {
     display: flex;
     justify-content: space-between;
+    align-items: center;
 }
 .message .poster .identification {
     display: flex;
     align-items: center;
 }
+.identification * {
+    margin: 0.2em;
+}
 .message .content {
     border: 0;
     display: flex;
     flex-direction: column;
+    border: 1px solid gray;
+    background-color: rgb(224, 224, 224);
+    margin-top: 0.5em;
 }
 .message .likes {
     display: flex;
@@ -269,10 +289,10 @@ body {
     box-sizing: border-box;
 }
 .content-image {
-    height: 500px;
     display: block;
     margin: auto;
     box-sizing: border-box;
+    padding-bottom: 1em;
 }
 .post-window {
     box-sizing: border-box;
@@ -307,10 +327,14 @@ body {
     justify-content: space-between;
     display: flex;
     flex-direction: column;
+    padding: 0.5em;
 }
 .post-comment .area {
     display: flex;
     justify-content: space-between;
+}
+.post-comment .area * {
+    margin: 0.5em;
 }
 .post-comment .area textarea {
     width: 100%;
