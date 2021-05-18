@@ -51,6 +51,13 @@ CREATE TABLE IF NOT EXISTS friendship(
 );
 ",
 "
+create table if not exists friendship_req(
+    id int not null primary key auto_increment,
+    target VARCHAR(50) not null,
+    destination VARCHAR(50) not null
+);
+",
+"
 CREATE TRIGGER befriend_yourself
 AFTER INSERT ON users
 FOR EACH ROW

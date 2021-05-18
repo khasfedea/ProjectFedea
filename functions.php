@@ -84,10 +84,11 @@ class User {
     public $avatarSrc;
     public $friends;
     public $privacy;
+    public $authorized;
 
     public function __construct($student_id, $issuer_id){
         global $link;
-        $authorized = true;
+        $this->authorized = true;
         $this->student_id = $student_id;
         $sql = "
             SELECT firstName, lastName, avatarSrc, privacy FROM users WHERE student_id = ?;
@@ -105,9 +106,9 @@ class User {
             mysqli_stmt_execute($stmt);
             mysqli_stmt_store_result($stmt);
             // Friendship status
-            $authorized = mysqli_stmt_num_rows($stmt) == 1;
+            $this->authorized = mysqli_stmt_num_rows($stmt) == 1;
         }
-        if($authorized){
+        if($this->authorized){
             $this->friends = array();
             $sql = "SELECT friendedUser FROM friendship WHERE firstUser = ?;";
             $stmt = mysqli_prepare($link, $sql);
@@ -125,6 +126,41 @@ class User {
             mysqli_stmt_bind_result($stmt, $this->dateOfBirth, $this->email);
             mysqli_stmt_fetch($stmt);
         }
+    }
+    public function GetFriendshipStatus(){
+        global $link;
+        if($_SESSION["id"] == $this->student_id){
+            return;
+        }
+        $sql = "SELECT friendedUser FROM friendship WHERE firstUser = ? AND friendedUser = ?;";
+        $stmt = mysqli_prepare($link, $sql);
+        mysqli_stmt_bind_param($stmt, "ss", $_SESSION["id"], $this->student_id);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_store_result($stmt);
+        if(mysqli_stmt_num_rows($stmt) == 1){
+            return '<a class="remove-friend" id="'.$this->student_id.'" onclick="removeFriend('.$this->student_id.')">Remove Friend</a>';
+        }
+        $sql = "SELECT target FROM friendship_req WHERE destination = ? AND target = ?;";
+        $stmt = mysqli_prepare($link, $sql);
+        mysqli_stmt_bind_param($stmt, "ss", $_SESSION["id"], $this->student_id);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_store_result($stmt);
+        if(mysqli_stmt_num_rows($stmt) == 1){
+            return
+            '<div class="friendship-row" id="'.$this->student_id.'">'.PHP_EOL.
+            '<a class="accept-friend" id="'.$this->student_id.'" onclick="acceptFriendRequest('.$this->student_id.')">Accept</a>'.
+            '<a class="remove-friend" id="'.$this->student_id.'" onclick="removeFriendRequest('.$this->student_id.')">Deny</a>'.
+            '</div>'.PHP_EOL;
+        }
+        $sql = "SELECT target FROM friendship_req WHERE target = ? AND destination = ?;";
+        $stmt = mysqli_prepare($link, $sql);
+        mysqli_stmt_bind_param($stmt, "ss", $_SESSION["id"], $this->student_id);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_store_result($stmt);
+        if(mysqli_stmt_num_rows($stmt) == 1){
+            return '<a class="remove-friend" id="'.$this->student_id.'" onclick="cancelFriendRequest('.$this->student_id.')">Cancel Friend Request</a>';
+        }
+        return '<a class="add-friend" id="'.$this->student_id.'" onclick="sendFriendRequest('.$this->student_id.')">Add Friend</a>';
     }
 }
 class LikedComment {
@@ -398,5 +434,42 @@ function CompressImage($input, $output, $quality = 90){
             return;
         }
         imagejpeg($image, $output, $quality);
+}
+function SearchUser($keyword){
+    global $link;
+    $keyword = '%'.$keyword.'%';
+    $user_ids = array();
+    $users = array();
+    $sql = "SELECT student_id FROM users WHERE CONCAT(firstName,' ',lastName) LIKE ?;";
+    $stmt = mysqli_prepare($link, $sql);
+    mysqli_stmt_bind_param($stmt, "s", $keyword);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_bind_result($stmt, $row);
+    while(mysqli_stmt_fetch($stmt)) {
+        $user_ids[] = $row;
+    }
+    foreach($user_ids as $user_id){
+        $users[] = new User($user_id, $_SESSION["id"]);
+    }
+    return $users;
+}
+function PostUsers($user_array){
+    foreach($user_array as $user){
+        echo '<div class="result-element">'.PHP_EOL;
+        echo '<div class="identification">'.PHP_EOL;
+        echo '<img class="avatar" src="'.$user->avatarSrc.'"/>'.PHP_EOL;
+        echo '<span class="name">'.$user->firstName.' '.$user->lastName.'</span>'.PHP_EOL;
+        echo '</div>'.PHP_EOL;
+        echo $user->GetFriendshipStatus();
+        echo '</div>'.PHP_EOL;
+    }
+}
+class SearchResult{
+    public $result;
+    
+    public function __construct($result_array){
+        $this->result = $result_array;
+    }
+
 }
 ?>

@@ -339,20 +339,28 @@ body {
 .post-comment .area textarea {
     width: 100%;
 }
+.search-field {
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    border: 1px solid black;
+    border-radius: 5px;
+    margin: 1em 10em 1em 10em;
+}
 @media screen and (max-width: 1250px){
-    .post, .post-window {
+    .post, .post-window, .search-field {
         margin: 1em;
     }
 }
-.like-button {
+.like-button, .add-friend {
     color: rgb(100, 100, 206);
     font-weight: bold;
 }
-.comment-button {
+.comment-button, .accept-friend {
     color: rgb(100, 156, 100);
     font-weight: bold;
 }
-.remove-button {
+.remove-button, .remove-friend {
     color: rgb(206, 100, 100);
     font-weight: bold;
 }
@@ -360,4 +368,22 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+}
+.result-element {
+    border: 1px solid gray;
+    border-radius: 5px;
+    background-color: rgb(241, 241, 241);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1em;
+    margin: 0.5em;
+}
+.result-element .identification {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.result-element * {
+    margin: 0.25em;
 }

@@ -108,4 +108,142 @@ if(CheckPostSet("delete_post_id")){
     mysqli_stmt_bind_param($stmt, "s", $post_id);
     mysqli_stmt_execute($stmt);
 }
+if(CheckPostSet("friend_request_id")){
+    $friend_id = GetPostField("friend_request_id");
+    $sql = "
+    SELECT (SELECT COUNT(*) FROM friendship WHERE firstUser = ? AND friendedUser = ?)
+    + (SELECT COUNT(*) FROM friendship_req WHERE target = ? AND destination = ?)
+    + (SELECT COUNT(*) FROM friendship_req WHERE target = ? AND destination = ?)
+    FROM DUAL;
+    ";
+    $stmt = mysqli_prepare($link, $sql);
+    mysqli_stmt_bind_param($stmt, "ssssss", $_SESSION["id"], $friend_id, $_SESSION["id"], $friend_id, $friend_id, $_SESSION["id"]);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_store_result($stmt);
+    mysqli_stmt_bind_result($stmt, $count_result);
+    mysqli_stmt_fetch($stmt);
+    if($count_result > 0){
+        echo "An error occurred.";
+        return;
+    }
+    $sql = "
+    INSERT INTO friendship_req(target, destination) VALUES(?, ?);
+    ";
+    $stmt = mysqli_prepare($link, $sql);
+    mysqli_stmt_bind_param($stmt, "ss", $_SESSION["id"], $friend_id);
+    mysqli_stmt_execute($stmt);
+}
+if(CheckPostSet("cancel_request_id")){
+    $friend_id = GetPostField("cancel_request_id");
+    $sql = "
+    SELECT (SELECT COUNT(*) FROM friendship WHERE firstUser = ? AND friendedUser = ?)
+    + (SELECT COUNT(*) FROM friendship_req WHERE target = ? AND destination = ?)
+    FROM DUAL;
+    ";
+    $stmt = mysqli_prepare($link, $sql);
+    mysqli_stmt_bind_param($stmt, "ssss", $_SESSION["id"], $friend_id, $friend_id, $_SESSION["id"]);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_store_result($stmt);
+    mysqli_stmt_bind_result($stmt, $count_result);
+    mysqli_stmt_fetch($stmt);
+    if($count_result > 0){
+        echo "An error occurred.";
+        var_dump($count_result);
+        return;
+    }
+    $sql = "
+    DELETE FROM friendship_req WHERE target = ? AND destination = ?;
+    ";
+    $stmt = mysqli_prepare($link, $sql);
+    mysqli_stmt_bind_param($stmt, "ss", $_SESSION["id"], $friend_id);
+    mysqli_stmt_execute($stmt);
+}
+if(CheckPostSet("remove_request_id")){
+    $friend_id = GetPostField("remove_request_id");
+    $sql = "
+    SELECT (SELECT COUNT(*) FROM friendship WHERE firstUser = ? AND friendedUser = ?)
+    + (SELECT COUNT(*) FROM friendship_req WHERE target = ? AND destination = ?)
+    FROM DUAL;
+    ";
+    $stmt = mysqli_prepare($link, $sql);
+    mysqli_stmt_bind_param($stmt, "ssss", $_SESSION["id"], $friend_id, $_SESSION["id"], $friend_id);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_store_result($stmt);
+    mysqli_stmt_bind_result($stmt, $count_result);
+    mysqli_stmt_fetch($stmt);
+    if($count_result > 0){
+        echo "An error occurred.";
+        return;
+    }
+    $sql = "
+    DELETE FROM friendship_req WHERE destination = ? AND target = ?;
+    ";
+    $stmt = mysqli_prepare($link, $sql);
+    mysqli_stmt_bind_param($stmt, "ss", $_SESSION["id"], $friend_id);
+    mysqli_stmt_execute($stmt);
+}
+if(CheckPostSet("remove_friend_id")){
+    $friend_id = GetPostField("remove_friend_id");
+    $sql = "
+    SELECT COUNT(*) FROM friendship WHERE firstUser = ? AND friendedUser = ?;
+    ";
+    $stmt = mysqli_prepare($link, $sql);
+    mysqli_stmt_bind_param($stmt, "ss", $_SESSION["id"], $friend_id);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_store_result($stmt);
+    mysqli_stmt_bind_result($stmt, $count_result);
+    mysqli_stmt_fetch($stmt);
+    if($count_result == 0){
+        echo "An error occurred.";
+        return;
+    }
+    $sql = "
+    DELETE FROM friendship WHERE firstUser = ? AND friendedUser = ?;
+    ";
+    $stmt = mysqli_prepare($link, $sql);
+    mysqli_stmt_bind_param($stmt, "ss", $_SESSION["id"], $friend_id);
+    mysqli_stmt_execute($stmt);
+    $sql = "
+    DELETE FROM friendship WHERE firstUser = ? AND friendedUser = ?;
+    ";
+    $stmt = mysqli_prepare($link, $sql);
+    mysqli_stmt_bind_param($stmt, "ss", $friend_id, $_SESSION["id"]);
+    mysqli_stmt_execute($stmt);
+}
+if(CheckPostSet("accept_request_id")){
+    $friend_id = GetPostField("accept_request_id");
+    $sql = "
+    SELECT (SELECT COUNT(*) FROM friendship WHERE firstUser = ? AND friendedUser = ?)
+    + (SELECT COUNT(*) FROM friendship_req WHERE target = ? AND destination = ?)
+    FROM DUAL;
+    ";
+    $stmt = mysqli_prepare($link, $sql);
+    mysqli_stmt_bind_param($stmt, "ssss", $_SESSION["id"], $friend_id, $_SESSION["id"], $friend_id);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_store_result($stmt);
+    mysqli_stmt_bind_result($stmt, $count_result);
+    mysqli_stmt_fetch($stmt);
+    if($count_result > 0){
+        echo "An error occurred.";
+        return;
+    }
+    $sql = "
+    DELETE FROM friendship_req WHERE destination = ? AND target = ?;
+    ";
+    $stmt = mysqli_prepare($link, $sql);
+    mysqli_stmt_bind_param($stmt, "ss", $_SESSION["id"], $friend_id);
+    mysqli_stmt_execute($stmt);
+    $sql = "
+    INSERT INTO friendship(firstUser, friendedUser) VALUES(?, ?);
+    ";
+    $stmt = mysqli_prepare($link, $sql);
+    mysqli_stmt_bind_param($stmt, "ss", $_SESSION["id"], $friend_id);
+    mysqli_stmt_execute($stmt);
+    $sql = "
+    INSERT INTO friendship(firstUser, friendedUser) VALUES(?, ?);
+    ";
+    $stmt = mysqli_prepare($link, $sql);
+    mysqli_stmt_bind_param($stmt, "ss", $friend_id, $_SESSION["id"]);
+    mysqli_stmt_execute($stmt);
+}
 ?>

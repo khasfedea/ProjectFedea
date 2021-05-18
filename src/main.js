@@ -115,3 +115,80 @@ function deleteComment(id, post_id){
         }
     });
 }
+function sendFriendRequest(id){
+    $.post("handler.php",
+    {
+        friend_request_id: id
+    },
+    function(data){
+        if(data.length > 0){
+            alert(data);
+            return;
+        }
+        $(".add-friend#"+id).attr("class", "remove-friend");
+        $(".remove-friend#"+id).attr("onclick", "cancelFriendRequest("+id+")");
+        $(".remove-friend#"+id).text("Cancel Friend Request");
+    });
+}
+function cancelFriendRequest(id){
+    $.post("handler.php",
+    {
+        cancel_request_id: id
+    },
+    function(data){
+        if(data.length > 0){
+            alert(data);
+            return;
+        }
+        $(".remove-friend#"+id).attr("class", "add-friend");
+        $(".add-friend#"+id).attr("onclick", "sendFriendRequest("+id+")");
+        $(".add-friend#"+id).text("Add Friend");
+    });
+}
+function removeFriendRequest(id){
+    if (!confirm("Are you sure you want to deny friend request?")){
+        return;
+    }
+    $.post("handler.php",
+    {
+        remove_request_id: id
+    },
+    function(data){
+        if(data.length > 0){
+            alert(data);
+            return;
+        }
+        $(".friendship-row#"+id).html('<a class="add-friend" id="'+id+'" onclick="sendFriendRequest('+id+')">Add Friend</a>');
+    });
+}
+function acceptFriendRequest(id){
+    $.post("handler.php",
+    {
+        accept_request_id: id
+    },
+    function(data){
+        if(data.length > 0){
+            alert(data);
+            return;
+        }
+        $(".friendship-row#"+id).html('<a class="remove-friend" id="'+id+'" onclick="removeFriend('+id+')">Remove Friend</a>');
+    });
+}
+function removeFriend(id){
+    if (!confirm("Are you sure you want to remove friend?")){
+        return;
+    }
+    $.post("handler.php",
+    {
+        remove_friend_id: id
+    },
+    function(data){
+        if(data.length > 0){
+            alert(data);
+            return;
+        }
+        $(".remove-friend#"+id).attr("class", "add-friend");
+        $(".add-friend#"+id).attr("onclick", "sendFriendRequest("+id+")");
+        $(".add-friend#"+id).text("Add Friend");
+    });
+}
