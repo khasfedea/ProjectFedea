@@ -100,8 +100,8 @@ if(CheckPostSet("register")) {
             <td><input name="confirm_password_reg" type="password" placeholder="Enter your Password again" title="Enter your password again." required></td>
         </tr>
         <tr>
-            <td><button class="login-button" name="register">Sign Up</button></td>
             <td><a href="login.php" class="login-toggle">Log In</a>
+            <td><button class="login-button" name="register">Sign Up</button></td>
         </tr>
     </table>
     <span class="invalid-feedback"><?php echo $register_err ?></span>

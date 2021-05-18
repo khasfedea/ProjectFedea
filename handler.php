@@ -95,6 +95,10 @@ if(CheckPostSet("delete_post_id")){
         echo 'unauthorized';
         return;
     }
+    //If image is ever a folder somehow, do not delete.
+    if(!is_dir($post->image)){
+        unlink($post->image);
+    }
     $sql = "
     DELETE FROM posts WHERE id = ?;
     ";

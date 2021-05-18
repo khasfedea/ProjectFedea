@@ -30,6 +30,8 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] === false){
 <body>
     <?php include "templates/header.html"?>
     <script>makeButtonActive("mesg");</script>
+    <div class="search-field">
+    </div>
     <?php include "templates/footer.html"?>
 </body>
 </html>

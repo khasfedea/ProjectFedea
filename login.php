@@ -90,8 +90,8 @@ if(CheckPostSet('log-in')) {
             <td><input name="password" type="password" placeholder="Enter your Password" required></td>
         </tr>
         <tr>
-            <td><button class="login-button" name="log-in">Log In</button></td>
             <td><a href="register.php" class="login-toggle">Sign Up</a>
+            <td><button class="login-button" name="log-in">Log In</button></td>
         </tr>
     </table>
     <span class="invalid-feedback"><?php echo $login_err ?></span>

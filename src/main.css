@@ -45,10 +45,13 @@ body {
     border-spacing: 15px;
 }
 .login-toggle {
-    float: right;
+    float: left;
     text-align: right;
     text-decoration: none;
     color: dodgerblue;
+}
+.login-button {
+    float: right;
 }
 .login-header {
     width: 100%;
@@ -389,4 +392,7 @@ body {
 }
 .result-element * {
     margin: 0.25em;
+}
+p {
+    white-space: pre-wrap;
 }

@@ -246,8 +246,8 @@ class Comment {
         echo '</div>'.PHP_EOL;
         echo '<span class="timestamp">'.$this->timestamp.'</span>'.PHP_EOL;
         echo '</div>'.PHP_EOL;
-        echo '<div class="content">'.PHP_EOL.'<p>'.PHP_EOL;
-        echo $this->comment.PHP_EOL.'</p>'.PHP_EOL;
+        echo '<div class="content">'.PHP_EOL.'<p>';
+        echo $this->comment.'</p>'.PHP_EOL;
         echo '<div class="under-comment">'.PHP_EOL;
         echo '<div class="likes">'.PHP_EOL;
         echo '<span id="like-comment-'.$this->post_id.'-'.$this->id.'">'.$this->getLikeCount().'</span>'.PHP_EOL;
@@ -348,8 +348,8 @@ class Post {
         //echo '<span class="SID">'.$this->poster->student_id.'</span>'.PHP_EOL;
         echo '</div>'.PHP_EOL;
         echo '<span class="timestamp">'.$this->timestamp.'</span>'.PHP_EOL;
-        echo '</div>'.PHP_EOL.'<div class="content">'.PHP_EOL.'<p>'.PHP_EOL;
-        echo $this->post.PHP_EOL.'</p>'.PHP_EOL;
+        echo '</div>'.PHP_EOL.'<div class="content">'.PHP_EOL.'<p>';
+        echo $this->post.'</p>'.PHP_EOL;
         if(!empty($this->image)){
             echo '<img class="content-image" src="'.$this->image.'"/>'.PHP_EOL;
         }
