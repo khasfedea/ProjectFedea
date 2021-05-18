@@ -246,4 +246,8 @@ if(CheckPostSet("accept_request_id")){
     mysqli_stmt_bind_param($stmt, "ss", $friend_id, $_SESSION["id"]);
     mysqli_stmt_execute($stmt);
 }
+if(CheckPostSet("search_keyword")){
+    $keyword = GetPostField("search_keyword");
+    PostUsers(SearchUser($keyword));
+}
 ?>

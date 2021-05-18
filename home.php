@@ -33,7 +33,6 @@ $currentUser = new User($_SESSION["id"], $_SESSION["id"]);
     <?php include "templates/header.html"?>
     <script>makeButtonActive("home");</script>
     <div class="search-field">
-        <?php PostUsers(SearchUser("i")); ?>
     </div>
     <?php
     echo '<div class="post-window">'.PHP_EOL;

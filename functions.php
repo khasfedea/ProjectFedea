@@ -437,12 +437,12 @@ function CompressImage($input, $output, $quality = 90){
 }
 function SearchUser($keyword){
     global $link;
-    $keyword = '%'.$keyword.'%';
+    $username = '%'.$keyword.'%';
     $user_ids = array();
     $users = array();
-    $sql = "SELECT student_id FROM users WHERE CONCAT(firstName,' ',lastName) LIKE ?;";
+    $sql = "SELECT student_id FROM users WHERE CONCAT(firstName,' ',lastName) LIKE ? OR student_id = ?;";
     $stmt = mysqli_prepare($link, $sql);
-    mysqli_stmt_bind_param($stmt, "s", $keyword);
+    mysqli_stmt_bind_param($stmt, "ss", $username, $keyword);
     mysqli_stmt_execute($stmt);
     mysqli_stmt_bind_result($stmt, $row);
     while(mysqli_stmt_fetch($stmt)) {

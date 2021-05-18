@@ -57,6 +57,28 @@ function postStatus(){
         }
     });
 }
+$(document).ready(function(){
+    $(".search-form").on('search', function () {
+        if($(".search-form").val().length === 0){
+            $(".search-field").attr("class", "search-field");
+            return;
+        }
+        $.post("handler.php",
+        {
+            search_keyword: $(".search-form").val()
+        },
+        function(data){
+            if(data.length === 0){
+                data =
+                '<div class="result-element">'+
+                '<span>No result found.</span>'+
+                '</div>';
+            }
+            $(".search-field").html(data);
+            $(".search-field").attr("class", "search-field search-visible");
+        });
+    });
+})
 function postComment(postid){
     comment_id = "commentText-"+postid;
     commentText = document.getElementById(comment_id).value;

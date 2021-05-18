@@ -340,12 +340,15 @@ body {
     width: 100%;
 }
 .search-field {
-    display: flex;
+    display: none;
     flex-direction: column;
     background-color: white;
     border: 1px solid black;
     border-radius: 5px;
     margin: 1em 10em 1em 10em;
+}
+.search-visible {
+    display: flex;
 }
 @media screen and (max-width: 1250px){
     .post, .post-window, .search-field {
