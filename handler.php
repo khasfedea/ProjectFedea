@@ -454,4 +454,55 @@ if(CheckPostSet("modify_values")){
         mysqli_stmt_execute($stmt);
     }
 }
+if(CheckPostSet("query_messages")){
+    $secondUser = GetPostField("second_user");
+    $message_ids = array();
+    $messages = array();
+    $sql = "SELECT id FROM messages WHERE sender_id = ? AND receiver_id = ?;";
+    $stmt = mysqli_prepare($link, $sql);
+    mysqli_stmt_bind_param($stmt, "ss", $_SESSION["id"], $secondUser);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_bind_result($stmt, $row);
+    while(mysqli_stmt_fetch($stmt)) {
+        $message_ids[] = $row;
+    }
+    $sql = "SELECT id FROM messages WHERE receiver_id = ? AND sender_id = ?;";
+    $stmt = mysqli_prepare($link, $sql);
+    mysqli_stmt_bind_param($stmt, "ss", $_SESSION["id"], $secondUser);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_bind_result($stmt, $row);
+    while(mysqli_stmt_fetch($stmt)) {
+        $message_ids[] = $row;
+    }
+    if(!empty($message_ids)){
+        foreach($message_ids as $message_id){
+            $messages[] = new Message($message_id);
+        }
+        usort($messages, function($a, $b) {
+            return $a->id <=> $b->id;
+        });
+        foreach($messages as $message){
+            $sender = new User($message->sender, $_SESSION["id"]);
+            if($message->sender == $_SESSION["id"]){
+                echo '<div class="sent">';
+            } else {
+                echo '<div class="received">';
+            }
+            echo '<div class="top-row">';
+            echo '<span>'.$sender->firstName.' '.$sender->lastName.'</span>';
+            echo '<span>'.$message->timestamp.'</span>';
+            echo '</div>';
+            echo '<p>'.$message->message.'</p>';
+            echo '</div>';
+        }
+    }
+}
+if(CheckPostSet("send_message")){
+    $message = GetPostField("send_message");
+    $recipient = GetPostField("recipient");
+    $sql = "INSERT INTO messages(sender_id, receiver_id, message) VALUES(?,?,?);";
+    $stmt = mysqli_prepare($link, $sql);
+    mysqli_stmt_bind_param($stmt, "sss", $_SESSION["id"], $recipient, $message);
+    mysqli_stmt_execute($stmt);
+}
 ?>

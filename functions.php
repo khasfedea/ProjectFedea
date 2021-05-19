@@ -249,6 +249,25 @@ class User {
         echo '</div>';
     }
 }
+class Message {
+    public $id;
+    public $sender;
+    public $recipient;
+    public $message;
+    public $timestamp;
+
+    public function __construct($id){
+        global $link;
+        $this->id = $id;
+        $sql = "SELECT id, message, DATE_FORMAT(timestamp, '%e %b, %H:%i'), sender_id, receiver_id FROM messages WHERE id = ?;";
+        $stmt = mysqli_prepare($link, $sql);
+        mysqli_stmt_bind_param($stmt, "s", $this->id);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_store_result($stmt);
+        mysqli_stmt_bind_result($stmt, $this->id, $this->message, $this->timestamp, $this->sender, $this->receiver);
+        mysqli_stmt_fetch($stmt);
+    }
+}
 class LikedComment {
     public $liker;
     public $liked;
@@ -900,11 +919,13 @@ function CutImage($input,$output){
     $centreX = round($im->getWidth() / 2);
     $centreY = round($im->getHeight() / 2);
 
-    $x1 = $centreX - $im->getWidth()/2;
-    $y1 = $centreY - $im->getWidth()/2;
+    $minDimension = min($im->getWidth(), $im->getHeight());
 
-    $x2 = $centreX + $im->getWidth()/2;
-    $y2 = $centreY + $im->getWidth()/2;
+    $x1 = $centreX - $minDimension/2;
+    $y1 = $centreY - $minDimension/2;
+
+    $x2 = $centreX + $minDimension/2;
+    $y2 = $centreY + $minDimension/2;
 
     $im->crop($x1, $y1, $x2, $y2);
     $im->save($output);

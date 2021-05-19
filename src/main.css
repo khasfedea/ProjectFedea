@@ -442,6 +442,18 @@ p {
     width: 100%;
     margin-bottom: 1em;
 }
+.message-field {
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    border: 1px solid gray;
+    border-radius: 5px;
+    padding: 0.5em;
+    margin-bottom: 0.5em;
+}
+.message-field, #message-friends {
+    height: 35vw;
+}
 .big-avatar {
     width: 200px;
     border-radius: 20px;
@@ -537,4 +549,70 @@ p {
 }
 .name-field * {
     margin: 0.2em;
+}
+.message-pane {
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+    box-sizing: border-box;
+    width: 55%;
+    height: 35vw;
+}
+
+.message-window {
+    display: flex;
+    padding: 0.5em;
+    justify-content: space-between;
+    box-sizing: border-box;
+}
+@media screen and (min-width: 1550px){
+    .message-pane {
+        width: 50%;
+    }
+}
+@media screen and (max-width: 1250px){
+    .message-pane {
+        width: auto;
+        height: 90vw;
+    }
+    .message-window {
+        padding: 0;
+        flex-direction: column;
+    }
+    .message-field, #message-friends {
+        margin: 0.5em;
+        width: auto;
+        height: 70vw;
+    }
+    .message-field {
+        margin-bottom: 0.5em;
+    }
+    .message-pane input {
+        margin: 0.5em;
+    }
+    #message-friends {
+        order: -1;
+    }
+}
+.sent, .received {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid gray;
+    border-radius: 5px;
+    padding: 0.5em;
+    margin: 0.25em;
+    width: 50%;
+}
+.sent {
+    margin-left: auto;
+    background-color: rgb(241, 241, 241);
+}
+.received {
+    float: left;
+    background-color: rgb(224, 224, 224);
+}
+.top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }

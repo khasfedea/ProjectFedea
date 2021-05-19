@@ -127,7 +127,6 @@ function fetchRequests(){
         fetch_friend_request: true
     },
     function(data){
-        console.log(data);
         if(data == "new_friend"){
             $("#profile").css("background-color", "rgb(255,200,220)");
             $("#requests").css("background-color", "rgb(200,255,220)");
