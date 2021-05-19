@@ -1,33 +1,55 @@
 <?php
-/**
+/** @file
  * This file is a part of Fedea Project (https://github.com/khasfedea/FedeaProject).
+ * \copyright
  * Copyright (C) 2021 Furkan Mudanyali, Team FEDEA.
  * 
+ * \license{
  * This program is free software: you can redistribute it and/or modify  
  * it under the terms of the GNU General Public License as published by  
  * the Free Software Foundation, version 3.
  *
- * This program is distributed in the hope that it will be useful, but 
- * WITHOUT ANY WARRANTY; without even the implied warranty of 
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU 
- * General Public License for more details.
+ * This program is distributed in the hope that it will be useful, but \n
+ * WITHOUT ANY WARRANTY; without even the implied warranty of \n
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU \n
+ * General Public License for more details. \n
  *
- * You should have received a copy of the GNU General Public License 
+ * You should have received a copy of the GNU General Public License \n
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ * }
  */
 require_once "config.php";
+/**
+ * Make the sql link global across functions
+ * 
+ */
 $link = $GLOBALS['link'];
-// Just a fancy alias to fit in the naming convention
+/**
+ * Just a fancy alias to fit in the naming convention
+ * @param string POST field to check
+ * @return bool The POST is set
+ */
 function CheckPostSet($name){
     return isset($_POST[$name]);
 }
+/**
+ * Return POST value if POST field is set
+ * @param string POST field to check
+ * @return string POST value
+ */
 function GetIfSet($name){
     if(CheckPostSet($name)){
         return $_POST['firstName_reg'];
     }
     return "";
 }
-// Get defined POST value.
+/**
+ *  Get the value of the specified POST field.
+ * @param string POST field
+ * @param bool Is the field required to be filled
+ * @param string custom row name for sql
+ * @return string POST value
+ */
 function GetPostField($name, $isRequired=false, $rowName=""){
     global $link;
     $realName = translateRegisterVariable($name);
@@ -43,7 +65,11 @@ function GetPostField($name, $isRequired=false, $rowName=""){
     // We should have a proper $name if it survived all these checks.
     return $name;
 }
-// To ease error handling in GetPostField
+/**
+ * To ease error handling in GetPostField
+ * @param string Error string to translate
+ * @return string Correct error string
+ */
 function translateRegisterVariable($name){
     switch($name){
         case "email":
@@ -66,7 +92,11 @@ function translateRegisterVariable($name){
     }
     return $realName;
 }
-// Made primarily for duplicate rows, may be modified for general use.
+/**
+ * Made primarily for duplicate rows, may be modified for general use.
+ * @param link SQL link
+ * @return string Error message
+ */
 function handleQueryError($link){
     if (preg_match_all('/".*?"|\'.*?\'/', mysqli_error($link), $match)) {
         $error_msg = translateRegisterVariable(str_replace("'","",$match[0][1]))." is already in use.";
@@ -88,6 +118,13 @@ class User {
     public $branch;
     public $bio;
 
+    /**
+     * User constructor
+     * 
+     * @param string The student_id of the user to be created
+     * @param string The student_id of who issues the user, for privacy
+     * @return void
+     */
     public function __construct($student_id, $issuer_id){
         global $link;
         $this->authorized = true;
@@ -131,6 +168,12 @@ class User {
             mysqli_stmt_fetch($stmt);
         }
     }
+    /**
+     * Echo the friendship buttons according to the issuer_id
+     * 
+     * @param void
+     * @return void
+     */
     public function GetFriendshipStatus(){
         global $link;
         if($_SESSION["id"] == $this->student_id){
@@ -166,6 +209,12 @@ class User {
         }
         return '<a class="add-friend" id="'.$this->student_id.'" onclick="sendFriendRequest('.$this->student_id.')">Add Friend</a>';
     }
+    /**
+     * Echo user specific posts.
+     * 
+     * @param void
+     * @return void
+     */
     public function PrintUserPosts(){
         global $link;
         $posts = array();
@@ -189,6 +238,12 @@ class User {
             }
         }
     }
+    /**
+     * Echo user portfolio according to the issuer_id
+     * 
+     * @param void
+     * @return void
+     */
     public function PrintPortfolio(){
         echo '<div class="portfolio-field">';
         if($this->authorized){
@@ -255,7 +310,12 @@ class Message {
     public $recipient;
     public $message;
     public $timestamp;
-
+    /**
+     * Message class constructor
+     * 
+     * @param int Message id
+     * @return void
+     */
     public function __construct($id){
         global $link;
         $this->id = $id;
@@ -271,7 +331,12 @@ class Message {
 class LikedComment {
     public $liker;
     public $liked;
-
+    /**
+     * Liked comment constructor
+     * 
+     * @param int Message id
+     * @return void
+     */
     public function __construct($id){
         global $link;
         $sql = "SELECT liked FROM liked_comments WHERE liker = ?;";
@@ -289,7 +354,12 @@ class Comment {
     public $comment;
     public $timestamp;
     public $admins;
-
+    /**
+     * Comment class constructor
+     * 
+     * @param int Message id
+     * @return void
+     */
     public function __construct($id){
         global $link;
         $this->id = $id;
@@ -311,6 +381,11 @@ class Comment {
             $this->admins[] = $row;
         }
     }
+    /**
+     * Get the like count of the message.
+     * @param void
+     * @return int The number of likes
+     */
     public function getLikeCount(){
         global $link;
         $sql = "SELECT liker FROM liked_comments WHERE liked = ?;";
@@ -320,6 +395,11 @@ class Comment {
         mysqli_stmt_store_result($stmt);
         return mysqli_stmt_num_rows($stmt);
     }
+    /**
+     * Like/Unlike the comment according to the session id.
+     * @param void
+     * @return void 
+     */
     public function likeComment(){
         global $link;
         $sql = "SELECT liker FROM liked_comments WHERE liked = ? AND liker = ?;";
@@ -339,6 +419,11 @@ class Comment {
             mysqli_stmt_execute($stmt);
         }
     }
+    /**
+     * Check if the session id user liked the comment or not.
+     * @param void
+     * @return string Like string
+     */
     public function GetLikeStatus(){
         global $link;
         $sql = "SELECT liker FROM liked_comments WHERE liked = ? AND liker = ?;";
@@ -352,6 +437,11 @@ class Comment {
             return "Like";
         }
     }
+    /**
+     * Echo the comment in the specific format.
+     * @param void
+     * @return void
+     */
     public function printComment(){
         echo '<div class="message" id="'.$this->id.'">'.PHP_EOL;
         echo '<div class="poster">'.PHP_EOL.'<div class="identification">'.PHP_EOL;
@@ -380,7 +470,11 @@ class Announcement {
     public $image;
     public $timestamp;
     public $admins;
-
+    /**
+     * Announcement class constructor
+     * @param int Announcement id
+     * @return void
+     */
     public function __construct($id){
         global $link;
         $this->id = $id;
@@ -402,6 +496,12 @@ class Announcement {
             $this->admins[] = $row;
         }
     }
+    /**
+     * Echo the announcement in a specific format,
+     * put delete button if the session_id is in the admins array.
+     * @param void
+     * @return void
+     */
     public function PrintAnnouncement(){
         global $link;
         echo '<div class="post" id="'.$this->id.'">'.PHP_EOL;
@@ -434,7 +534,12 @@ class Post {
     public $timestamp;
     public $comments;
     public $admins;
-
+    /**
+     * Post class constructor
+     * @param int Post ID
+     * @param string Issuer ID
+     * @return void
+     */
     public function __construct($id, $issuer){
         global $link;
         $this->id = $id;
@@ -469,6 +574,11 @@ class Post {
             $this->admins[] = $row;
         }
     }
+    /**
+     * Returns the number of likes of the post
+     * @param void
+     * @return int Number of likes
+     */
     public function getLikeCount(){
         global $link;
         $sql = "SELECT liker FROM liked_posts WHERE liked = ?;";
@@ -478,6 +588,11 @@ class Post {
         mysqli_stmt_store_result($stmt);
         return mysqli_stmt_num_rows($stmt);
     }
+    /**
+     * Like/Unlike the post according to the issuer ID
+     * @param void
+     * @return void
+     */
     public function likePost(){
         global $link;
         $sql = "SELECT liker FROM liked_posts WHERE liked = ? AND liker = ?;";
@@ -497,6 +612,11 @@ class Post {
             mysqli_stmt_execute($stmt);
         }
     }
+    /**
+     * Return the like status of the post.
+     * @param void
+     * @return string Like status
+     */
     public function GetLikeStatus(){
         global $link;
         $sql = "SELECT liker FROM liked_posts WHERE liked = ? AND liker = ?;";
@@ -510,9 +630,19 @@ class Post {
             return "Like";
         }
     }
+        /**
+     * Returns the number of comments of the post
+     * @param void
+     * @return int Number of comments
+     */
     public function getCommentCount(){
         return count($this->comments);
     }
+    /**
+     * Echo the post in a specific format.
+     * @param void
+     * @return void
+     */
     public function printPost(){
         global $link;
         echo '<div class="post" id="'.$this->id.'">'.PHP_EOL;
@@ -553,6 +683,11 @@ class Post {
         echo '</div>'.PHP_EOL.'</div>'.PHP_EOL.'</div>'.PHP_EOL;
     }
 }
+/**
+ * Echo every "Post" of the issuers friends.
+ * @param string Issuer ID
+ * @return void
+ */
 function PostThePosts($issuer_id){
     global $link;
     $posts = array();
@@ -588,6 +723,11 @@ function PostThePosts($issuer_id){
         }
     }
 }
+/**
+ * Echo every announcement.
+ * @param void
+ * @return void
+ */
 function PrintAnnouncements(){
     global $link;
     $announcement_ids = array();
@@ -610,6 +750,12 @@ function PrintAnnouncements(){
         }
     }
 }
+/**
+ * Compress the given image, return error if input is not an image.
+ * @param string Input path
+ * @param string Output path
+ * @param int Quality of the compression
+ */
 function CompressImage($input, $output, $quality = 90){
     $file_info = getimagesize($input);
     if($file_info === false){
@@ -632,6 +778,7 @@ function CompressImage($input, $output, $quality = 90){
         }
         imagejpeg($image, $output, $quality);
 }
+
 /**
  * ImageManipulator Class by philBrown,
  * https://gist.github.com/philBrown/880506
@@ -914,6 +1061,11 @@ class ImageManipulator
         return $this->height;
     }
 }
+/**
+ * Cut the given image to a square.
+ * @param string Input path
+ * @param string Output path
+ */
 function CutImage($input,$output){
     $im = new ImageManipulator($input);
     $centreX = round($im->getWidth() / 2);
@@ -930,7 +1082,11 @@ function CutImage($input,$output){
     $im->crop($x1, $y1, $x2, $y2);
     $im->save($output);
 }
-
+/**
+ * Search for the given keyword, and echo the result.
+ * @param string keyword to search
+ * @return users Array of user objects
+ */
 function SearchUser($keyword){
     global $link;
     $username = '%'.$keyword.'%';
@@ -949,6 +1105,11 @@ function SearchUser($keyword){
     }
     return $users;
 }
+/**
+ * Echo the given user object array
+ * @param users Array of user objects
+ * @return void
+ */
 function PostUsers($user_array){
     foreach($user_array as $user){
         echo '<div class="result-element">'.PHP_EOL;
@@ -960,6 +1121,11 @@ function PostUsers($user_array){
         echo '</div>'.PHP_EOL;
     }
 }
+/** 
+ * Echo the pending friend requests of the session user.
+ * @param void
+ * @return void
+ */
 function GetFriendRequests(){
     global $link;
     $user_ids = array();

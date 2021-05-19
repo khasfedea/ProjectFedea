@@ -7,7 +7,11 @@ html {
     align-items: center;
     align-content: center;
     background-color: rgb(28, 53, 78);
-    word-wrap: break-word;
+}
+.post-window .identification, .post .poster .identification, .message .poster .identification,
+.message-pane .identification, .friends .identification, .sent .top-row, .received .top-row,
+.user-portfolio .portfolio-identification {
+    word-break: break-all;
 }
 body {
     margin: 0 auto;
@@ -144,7 +148,7 @@ body {
 @media screen and (max-width: 800px){
     .content-image {
         width: 100%;
-        max-height: none;
+        max-height: 1000px;
     }
 }
 @media screen and (min-width: 1450px) {
@@ -454,6 +458,7 @@ p {
 }
 .message-field, #message-friends {
     height: 35vw;
+    overflow-x: hidden;
 }
 .big-avatar {
     width: 200px;
@@ -616,6 +621,7 @@ p {
     padding: 0.5em;
     margin: 0.25em;
     width: 50%;
+    word-break: break-all;
 }
 .sent {
     margin-left: auto;

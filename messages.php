@@ -28,7 +28,7 @@ $currentUser = new User($_SESSION["id"], $_SESSION["id"]);
 <head>
     <title>Messages</title>
     <?php include "templates/headtags.html"?>
-    <script src="src/messages.js"></script>
+    <script src="src/messages.js" type="text/javascript"></script>
 </head>
 <body>
     <?php include "templates/header.html"?>

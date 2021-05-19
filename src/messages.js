@@ -8,7 +8,7 @@ function fetchMessages(id = $(".friends .identification").first().attr("id"), sc
         $(".message-field").html(data);
         $(".message-field").attr("id",id);
         if(scrollBottom){
-            $('.message-field').scrollTop($('.message-field').height());
+            $('.message-field').scrollTop(9999999);
         }
         $('.message-pane .identification img').attr("src", $(".friends .identification#"+id+" .avatar").attr("src"));
         $('.message-pane .identification span').text($(".friends .identification#"+id+" a").text());
@@ -40,6 +40,7 @@ $(document).ready(function(){
         if (e.which == 13) {
           $(function(){
               sendMessage($('.message-enter').val());
+              $('.message-field').scrollTop(9999999);
           });
           return false;
         }
