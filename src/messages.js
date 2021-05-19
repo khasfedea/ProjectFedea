@@ -1,4 +1,4 @@
-function fetchMessages(id = $(".identification").first().attr("id")){
+function fetchMessages(id = $(".friends .identification").first().attr("id"), scrollBottom=true){
     $.post("handler.php",
     {
         query_messages: true,
@@ -7,11 +7,16 @@ function fetchMessages(id = $(".identification").first().attr("id")){
     function(data){
         $(".message-field").html(data);
         $(".message-field").attr("id",id);
+        if(scrollBottom){
+            $('.message-field').scrollTop($('.message-field').height());
+        }
+        $('.message-pane .identification img').attr("src", $(".friends .identification#"+id+" .avatar").attr("src"));
+        $('.message-pane .identification span').text($(".friends .identification#"+id+" a").text());
     });
 }
 
 function refreshMessages(){
-    fetchMessages($(".message-field").attr("id"));
+    fetchMessages($(".message-field").attr("id"), false);
 }
 
 function sendMessage(message){
@@ -27,7 +32,7 @@ function sendMessage(message){
 }
 
 $(document).ready(function(){
-    $(function() {refreshMessages()});
+    $(function() {fetchMessages($(".message-field").attr("id"), true)});
     $(function() {
         setInterval(refreshMessages, 5000);
     });

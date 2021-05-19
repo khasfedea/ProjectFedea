@@ -38,6 +38,10 @@ $currentUser = new User($_SESSION["id"], $_SESSION["id"]);
     <div class="message-window">
     <?php
     echo '<div class="message-pane">';
+    echo '<div class="identification">';
+    echo '<img class="avatar"/>';
+    echo '<span class="name"></span>';
+    echo '</div>';
     echo '<div class="message-field">';
     echo '</div>';
     echo '<input type="text" class="message-enter"/>';

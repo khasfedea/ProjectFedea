@@ -450,6 +450,7 @@ p {
     border-radius: 5px;
     padding: 0.5em;
     margin-bottom: 0.5em;
+    overflow-y: scroll;
 }
 .message-field, #message-friends {
     height: 35vw;
@@ -558,7 +559,17 @@ p {
     width: 55%;
     height: 35vw;
 }
-
+.message-pane .identification {
+    border-radius: 5px;
+    border: 1px solid gray;
+    background-color: rgb(241, 241, 241);
+    margin-bottom: 0.5em;
+    display: flex;
+    align-items: center;
+}
+.message-pane input {
+    height: 30px;
+}
 .message-window {
     display: flex;
     padding: 0.5em;
@@ -573,7 +584,10 @@ p {
 @media screen and (max-width: 1250px){
     .message-pane {
         width: auto;
-        height: 90vw;
+        height: 110vw;
+    }
+    .message-pane .identification {
+        margin: 0.5em;
     }
     .message-window {
         padding: 0;
