@@ -214,3 +214,8 @@ function removeFriend(id){
         $(".add-friend#"+id).text("Add Friend");
     });
 }
+function GoToUser(id){
+    var form = '';
+    form += '<input type="hidden" name="profile" value="'+id+'">';
+    $('<form action="profile.php" method="POST">'+form+'</form>').appendTo('body').submit();
+}

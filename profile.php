@@ -15,10 +15,16 @@
  * You should have received a copy of the GNU General Public License 
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
+require_once "functions.php";
 session_start();
 if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] === false){
     header("location: index.php");
     exit;
+}
+if(CheckPostSet("profile")){
+    $viewUser = new User(GetPostField("profile"),$_SESSION["id"]);
+} else {
+    $viewUser = new User($_SESSION["id"],$_SESSION["id"]);
 }
 ?>
 <!DOCTYPE html>
@@ -32,6 +38,7 @@ if(!isset($_SESSION["loggedin"]) || $_SESSION["loggedin"] === false){
     <script>makeButtonActive("profile");</script>
     <div class="search-field">
     </div>
+    <?php $viewUser->PrintPortfolio(); ?>
     <?php include "templates/footer.html"?>
 </body>
 </html>

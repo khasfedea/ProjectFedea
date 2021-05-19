@@ -396,3 +396,94 @@ body {
 p {
     white-space: pre-wrap;
 }
+.portfolio-field {
+    display: flex;
+    padding: 0.5em;
+    box-sizing: border-box;
+    border-radius: 5px;
+    justify-content:space-between;
+}
+.friends {
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    border: 1px solid gray;
+    border-radius: 5px;
+    padding: 0.5em;
+    max-height: 26vw;
+    width: 26vw;
+    overflow-y: scroll;
+}
+.friends .identification {
+    display: flex;
+    align-items: center;
+    background-color: rgb(241, 241, 241);
+    border: 1px solid gray;
+    border-radius: 5px;
+    padding: 0.5em;
+    margin: 0.25em;
+}
+.user-portfolio {
+    display: flex;
+    flex-direction: column;
+    background-color: white;
+    border: 1px solid gray;
+    border-radius: 5px;
+    padding: 0.5em;
+    margin-right: 0.5em;
+    width: 100%;
+    margin-bottom: 1em;
+}
+.big-avatar {
+    width: 200px;
+    border-radius: 20px;
+}
+.portfolio-identification {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: rgb(241, 241, 241);
+    border: 1px solid gray;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    padding: 0.5em;
+    margin: 0.25em;
+    margin-bottom: 0;
+}
+.additional-info {
+    background-color: rgb(224, 224, 224);
+    border: 1px solid gray;
+    padding: 0 0.5em 0 0.5em;
+    border-top: 0;
+    margin: 0.25em;
+    margin-top: 0;
+    margin-bottom: 0;
+    display: flex;
+    justify-content: space-between;
+}
+.bio {
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+    background-color: rgb(224, 224, 224);
+    border: 1px solid gray;
+    border-top: 0;
+    padding: 0.5em;
+    margin: 0.25em;
+    margin-top: 0;
+}
+.friend-button {
+    float: right;
+}
+@media screen and (max-width: 1250px){
+    .portfolio-field {
+        flex-direction: column;
+    }
+    .user-portfolio {
+        padding: 0;
+    }
+    .friends {
+        margin-top: 1em;
+        width: auto;
+        max-height: 80vw;
+    }
+}

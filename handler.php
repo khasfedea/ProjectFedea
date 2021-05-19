@@ -114,6 +114,10 @@ if(CheckPostSet("delete_post_id")){
 }
 if(CheckPostSet("friend_request_id")){
     $friend_id = GetPostField("friend_request_id");
+    if($friend_id == $_SESSION["id"]){
+        echo "An error occurred.";
+        return;
+    }
     $sql = "
     SELECT (SELECT COUNT(*) FROM friendship WHERE firstUser = ? AND friendedUser = ?)
     + (SELECT COUNT(*) FROM friendship_req WHERE target = ? AND destination = ?)
@@ -139,6 +143,10 @@ if(CheckPostSet("friend_request_id")){
 }
 if(CheckPostSet("cancel_request_id")){
     $friend_id = GetPostField("cancel_request_id");
+    if($friend_id == $_SESSION["id"]){
+        echo "An error occurred.";
+        return;
+    }
     $sql = "
     SELECT (SELECT COUNT(*) FROM friendship WHERE firstUser = ? AND friendedUser = ?)
     + (SELECT COUNT(*) FROM friendship_req WHERE target = ? AND destination = ?)
@@ -164,6 +172,10 @@ if(CheckPostSet("cancel_request_id")){
 }
 if(CheckPostSet("remove_request_id")){
     $friend_id = GetPostField("remove_request_id");
+    if($friend_id == $_SESSION["id"]){
+        echo "An error occurred.";
+        return;
+    }
     $sql = "
     SELECT (SELECT COUNT(*) FROM friendship WHERE firstUser = ? AND friendedUser = ?)
     + (SELECT COUNT(*) FROM friendship_req WHERE target = ? AND destination = ?)
@@ -188,6 +200,10 @@ if(CheckPostSet("remove_request_id")){
 }
 if(CheckPostSet("remove_friend_id")){
     $friend_id = GetPostField("remove_friend_id");
+    if($friend_id == $_SESSION["id"]){
+        echo "An error occurred.";
+        return;
+    }
     $sql = "
     SELECT COUNT(*) FROM friendship WHERE firstUser = ? AND friendedUser = ?;
     ";
@@ -216,6 +232,10 @@ if(CheckPostSet("remove_friend_id")){
 }
 if(CheckPostSet("accept_request_id")){
     $friend_id = GetPostField("accept_request_id");
+    if($friend_id == $_SESSION["id"]){
+        echo "An error occurred.";
+        return;
+    }
     $sql = "
     SELECT (SELECT COUNT(*) FROM friendship WHERE firstUser = ? AND friendedUser = ?)
     + (SELECT COUNT(*) FROM friendship_req WHERE target = ? AND destination = ?)

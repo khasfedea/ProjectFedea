@@ -85,19 +85,21 @@ class User {
     public $friends;
     public $privacy;
     public $authorized;
+    public $branch;
+    public $bio;
 
     public function __construct($student_id, $issuer_id){
         global $link;
         $this->authorized = true;
         $this->student_id = $student_id;
         $sql = "
-            SELECT firstName, lastName, avatarSrc, privacy FROM users WHERE student_id = ?;
+            SELECT firstName, lastName, avatarSrc, privacy, branch, bio FROM users WHERE student_id = ?;
         ";
         $stmt = mysqli_prepare($link, $sql);
         mysqli_stmt_bind_param($stmt, "s", $student_id);
         mysqli_stmt_execute($stmt);
         mysqli_stmt_store_result($stmt);
-        mysqli_stmt_bind_result($stmt, $this->firstName, $this->lastName, $this->avatarSrc, $this->privacy);
+        mysqli_stmt_bind_result($stmt, $this->firstName, $this->lastName, $this->avatarSrc, $this->privacy, $this->branch, $this->bio);
         mysqli_stmt_fetch($stmt);
         if($this->privacy){
             $sql = "SELECT friendedUser FROM friendship WHERE firstUser = ? AND friendedUser = ?;";
@@ -115,8 +117,10 @@ class User {
             mysqli_stmt_bind_param($stmt, "s", $student_id);
             mysqli_stmt_execute($stmt);
             mysqli_stmt_store_result($stmt);
-            mysqli_stmt_bind_result($stmt, $this->friends);
-            mysqli_stmt_fetch($stmt);
+            mysqli_stmt_bind_result($stmt, $row);
+            while(mysqli_stmt_fetch($stmt)) {
+                $this->friends[] = $row;
+            }
 
             $sql = "SELECT dateOfBirth, email FROM users WHERE student_id = ?;";
             $stmt = mysqli_prepare($link, $sql);
@@ -161,6 +165,81 @@ class User {
             return '<a class="remove-friend" id="'.$this->student_id.'" onclick="cancelFriendRequest('.$this->student_id.')">Cancel Friend Request</a>';
         }
         return '<a class="add-friend" id="'.$this->student_id.'" onclick="sendFriendRequest('.$this->student_id.')">Add Friend</a>';
+    }
+    public function PrintUserPosts(){
+        global $link;
+        $posts = array();
+        $sql = "SELECT id FROM posts WHERE poster_id = ?;";
+        $stmt = mysqli_prepare($link, $sql);
+        mysqli_stmt_bind_param($stmt, "s", $this->student_id);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_bind_result($stmt, $row);
+        while(mysqli_stmt_fetch($stmt)){
+            $post_ids[] = $row;
+        }
+        foreach($post_ids as $post_id){
+            $posts[] = new Post($post_id, $_SESSION["id"]);
+        }
+        usort($posts, function($a, $b) {
+            return $b->id <=> $a->id;
+        });
+        foreach($posts as $post){
+            $post->printPost();
+        }
+    }
+    public function PrintPortfolio(){
+        echo '<div class="portfolio-field">';
+        if($this->authorized){
+            echo '<div class="user-portfolio">';
+            echo '<div class="portfolio-identification">'.PHP_EOL;
+            echo '<img class="big-avatar" src="'.$this->avatarSrc.'"/>'.PHP_EOL;
+            echo '<h1>'.$this->firstName.' '.$this->lastName.'</h1>';
+            echo '</div>';
+            echo '<div class="additional-info">';
+            echo '<h3>'.$this->branch.'</h3>';
+            echo '<h3>'.$this->student_id.'</h3>';
+            echo '</div>';
+            echo '<div class="bio">';
+            echo '<p>'.$this->bio.'</p>';
+            echo '<div class="friend-button">';
+            echo $this->GetFriendshipStatus();
+            echo '</div>';
+            echo '</div>';
+            echo '</div>';
+            echo '<div class="friends">';
+            echo '<h2>Friends</h2>';
+            foreach($this->friends as $friend_id){
+                if ($friend_id == $this->student_id){
+                    continue;
+                }
+                $friend = new User($friend_id, $_SESSION["id"]);
+                echo '<div class="identification">'.PHP_EOL;
+                echo '<img class="avatar" src="'.$friend->avatarSrc.'"/>'.PHP_EOL;
+                echo '<a class="name" onclick="GoToUser(\''.$friend->student_id.'\')">'.$friend->firstName.' '.$friend->lastName.'</a>'.PHP_EOL;
+                echo '</div>'.PHP_EOL;
+            }
+            echo '</div>';
+            echo '</div>';
+            $this->PrintUserPosts();
+        }else{
+            echo '<div class="user-portfolio">';
+            echo '<div class="portfolio-identification">'.PHP_EOL;
+            echo '<img class="big-avatar" src="'.$this->avatarSrc.'"/>'.PHP_EOL;
+            echo '<h1>'.$this->firstName.' '.$this->lastName.'</h1>';
+            echo '</div>';
+            echo '<div class="additional-info">';
+            echo '<h3>'.$this->branch.'</h3>';
+            echo '<h3>'.$this->student_id.'</h3>';
+            echo '</div>';
+            echo '<div class="bio">';
+            echo '<p>'.$this->bio.'</p>';
+            echo '<div class="friend-button">';
+            echo $this->GetFriendshipStatus();
+            echo '</div>';
+            echo '</div>';
+            echo '</div>';
+        }
+        echo '</div>';
     }
 }
 class LikedComment {
@@ -241,8 +320,7 @@ class Comment {
         echo '<div class="message" id="'.$this->id.'">'.PHP_EOL;
         echo '<div class="poster">'.PHP_EOL.'<div class="identification">'.PHP_EOL;
         echo '<img class="avatar" src="'.$this->commenter->avatarSrc.'"/>'.PHP_EOL;
-        echo '<span class="name">'.$this->commenter->firstName.' '.$this->commenter->lastName.'</span>'.PHP_EOL;
-        //echo '<span class="SID">'.$this->commenter->student_id.'</span>'.PHP_EOL;
+        echo '<a class="name" onclick="GoToUser(\''.$this->commenter->student_id.'\')">'.$this->commenter->firstName.' '.$this->commenter->lastName.'</a>'.PHP_EOL;
         echo '</div>'.PHP_EOL;
         echo '<span class="timestamp">'.$this->timestamp.'</span>'.PHP_EOL;
         echo '</div>'.PHP_EOL;
@@ -344,8 +422,7 @@ class Post {
         echo '<div class="post" id="'.$this->id.'">'.PHP_EOL;
         echo '<div class="poster">'.PHP_EOL.'<div class="identification">'.PHP_EOL;
         echo '<img class="avatar" src="'.$this->poster->avatarSrc.'"/>'.PHP_EOL;
-        echo '<span class="name">'.$this->poster->firstName.' '.$this->poster->lastName.'</span>'.PHP_EOL;
-        //echo '<span class="SID">'.$this->poster->student_id.'</span>'.PHP_EOL;
+        echo '<a class="name" onclick="GoToUser(\''.$this->poster->student_id.'\')">'.$this->poster->firstName.' '.$this->poster->lastName.'</a>'.PHP_EOL;
         echo '</div>'.PHP_EOL;
         echo '<span class="timestamp">'.$this->timestamp.'</span>'.PHP_EOL;
         echo '</div>'.PHP_EOL.'<div class="content">'.PHP_EOL.'<p>';
