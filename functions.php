@@ -177,14 +177,16 @@ class User {
         while(mysqli_stmt_fetch($stmt)){
             $post_ids[] = $row;
         }
-        foreach($post_ids as $post_id){
-            $posts[] = new Post($post_id, $_SESSION["id"]);
-        }
-        usort($posts, function($a, $b) {
-            return $b->id <=> $a->id;
-        });
-        foreach($posts as $post){
-            $post->printPost();
+        if(!empty($post_ids)){
+            foreach($post_ids as $post_id){
+                $posts[] = new Post($post_id, $_SESSION["id"]);
+            }
+            usort($posts, function($a, $b) {
+                return $b->id <=> $a->id;
+            });
+            foreach($posts as $post){
+                $post->printPost();
+            }
         }
     }
     public function PrintPortfolio(){
@@ -480,14 +482,16 @@ function PostThePosts($issuer_id){
             $post_ids[] = $row;
         }
     }
-    foreach($post_ids as $post_id){
-        $posts[] = new Post($post_id, $issuer_id);
-    }
-    usort($posts, function($a, $b) {
-        return $b->id <=> $a->id;
-    });
-    foreach($posts as $post){
-        $post->printPost();
+    if(!empty($post_ids)){
+        foreach($post_ids as $post_id){
+            $posts[] = new Post($post_id, $issuer_id);
+        }
+        usort($posts, function($a, $b) {
+            return $b->id <=> $a->id;
+        });
+        foreach($posts as $post){
+            $post->printPost();
+        }
     }
 }
 function CompressImage($input, $output, $quality = 90){
@@ -535,9 +539,35 @@ function PostUsers($user_array){
         echo '<div class="result-element">'.PHP_EOL;
         echo '<div class="identification">'.PHP_EOL;
         echo '<img class="avatar" src="'.$user->avatarSrc.'"/>'.PHP_EOL;
-        echo '<span class="name">'.$user->firstName.' '.$user->lastName.'</span>'.PHP_EOL;
+        echo '<a class="name" onclick="GoToUser(\''.$user->student_id.'\')">'.$user->firstName.' '.$user->lastName.'</a>'.PHP_EOL;
         echo '</div>'.PHP_EOL;
         echo $user->GetFriendshipStatus();
+        echo '</div>'.PHP_EOL;
+    }
+}
+function GetFriendRequests(){
+    global $link;
+    $user_ids = array();
+    $users = array();
+    $sql = "SELECT target FROM friendship_req WHERE destination = ?;";
+    $stmt = mysqli_prepare($link, $sql);
+    mysqli_stmt_bind_param($stmt, "s",  $_SESSION["id"]);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_bind_result($stmt, $row);
+    while(mysqli_stmt_fetch($stmt)) {
+        $user_ids[] = $row;
+    }
+    foreach($user_ids as $user_id){
+        if($user_id == $_SESSION["id"]){
+            continue;
+        }
+        $users[] = new User($user_id, $_SESSION["id"]);
+    }
+    if(!empty($user_ids) > 0){
+        PostUsers($users);
+    } else {
+        echo '<div class="result-element">'.PHP_EOL;
+        echo "<p>You're all set!</p>".PHP_EOL;
         echo '</div>'.PHP_EOL;
     }
 }

@@ -57,6 +57,22 @@ function postStatus(){
         }
     });
 }
+function fetchRequests(){
+    $.post("handler.php",
+    {
+        fetch_friend_request: true
+    },
+    function(data){
+        console.log(data);
+        if(data == "new_friend"){
+            $("#profile").css("background-color", "rgb(255,200,220)");
+            $("#requests").css("background-color", "rgb(200,255,220)");
+        } else {
+            $("#profile").css("background-color", "");
+            $("#requests").css("background-color", "");
+        }
+    });
+}
 $(document).ready(function(){
     $(".search-form").on('search', function () {
         if($(".search-form").val().length === 0){
@@ -77,6 +93,10 @@ $(document).ready(function(){
             $(".search-field").html(data);
             $(".search-field").attr("class", "search-field search-visible");
         });
+    });
+    $(function() {fetchRequests()});
+    $(function() {
+        setInterval(fetchRequests, 15000);
     });
 })
 function postComment(postid){

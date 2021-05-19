@@ -274,4 +274,14 @@ if(CheckPostSet("search_keyword")){
     $keyword = GetPostField("search_keyword");
     PostUsers(SearchUser($keyword));
 }
+if(CheckPostSet("fetch_friend_request")){
+    $sql = "SELECT * FROM friendship_req WHERE destination = ?;";
+    $stmt = mysqli_prepare($link, $sql);
+    mysqli_stmt_bind_param($stmt, "s", $_SESSION["id"]);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_store_result($stmt);
+    if(mysqli_stmt_num_rows($stmt) > 0){
+        echo "new_friend";
+    }
+}
 ?>
