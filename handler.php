@@ -394,9 +394,9 @@ if(CheckPostSet("modify_values")){
             echo "invalid_email";
             return;
         }
-        $sql = "SELECT email FROM users WHERE student_id = ?";
+        $sql = "SELECT student_id FROM users WHERE email = ?";
         $stmt = mysqli_prepare($link, $sql);
-        mysqli_stmt_bind_param($stmt, "s", $_SESSION["id"]);
+        mysqli_stmt_bind_param($stmt, "s", $email);
         mysqli_stmt_execute($stmt);
         mysqli_stmt_store_result($stmt);
         if(mysqli_stmt_num_rows($stmt) == 1){

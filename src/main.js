@@ -101,10 +101,10 @@ function modifySettings(){
         success: function(response){
             switch(response){
                 case "invalid_email":
-                    $('#mail').text("Invalid E-mail.");
+                    $('#email').text("Invalid E-mail.");
                     break;
                 case "email_used":
-                    $('#mail').text("E-mail is already in use.");
+                    $('#email').text("E-mail is already in use.");
                     break;
                 case "invalid_password":
                     $('#confirmPassword').text("Wrong password.");
