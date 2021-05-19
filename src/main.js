@@ -57,6 +57,48 @@ function postStatus(){
         }
     });
 }
+function modifySettings(){
+    var form_data = new FormData();
+    var postPicture = $('.changeAvatar').prop('files')[0];
+    form_data.append('modify_values', true);
+    form_data.append('file', postPicture);
+    form_data.append('firstName', $('.firstName').val());
+    form_data.append('lastName', $('.lastName').val());
+    form_data.append('email', $('.email').val());
+    form_data.append('major', $('.major').val());
+    form_data.append('bio', $('.edit-bio').val());
+    form_data.append('confirmPassword', $('.confirmPassword').val());
+    $.ajax({
+        url: 'handler.php',
+        dataType: 'text',
+        cache: false,
+        contentType: false,
+        processData: false,
+        data: form_data,
+        type: 'post',
+        success: function(response){
+            switch(response){
+                case "invalid_email":
+                    $('#mail').text("Invalid E-mail.");
+                    break;
+                case "email_used":
+                    $('#mail').text("E-mail is already in use.");
+                    break;
+                case "invalid_password":
+                    $('#confirmPassword').text("Wrong password.");
+                    break;
+                case "empty_password":
+                    $('#confirmPassword').text("Please enter your password.");
+                case "invalid_image":
+                    $('#changeAvatar').text("There is a problem with the image.");
+                    break;
+                default:
+                    location.reload();
+                    break;
+            }
+        }
+    });
+}
 function fetchRequests(){
     $.post("handler.php",
     {

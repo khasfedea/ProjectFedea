@@ -284,4 +284,91 @@ if(CheckPostSet("fetch_friend_request")){
         echo "new_friend";
     }
 }
+if(CheckPostSet("modify_values")){
+    $password = GetPostField("confirmPassword");
+    if(empty($password)){
+        echo "empty_password";
+        return;
+    }
+    $sql = "SELECT password FROM users WHERE student_id = ?";
+    $stmt = mysqli_prepare($link, $sql);
+    mysqli_stmt_bind_param($stmt, "s", $_SESSION["id"]);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_store_result($stmt);
+    mysqli_stmt_bind_result($stmt, $hashed_password);
+    mysqli_stmt_fetch($stmt);
+    if(!password_verify($password, $hashed_password)){
+        echo "invalid_password";
+        return;
+    }
+    $firstName = GetPostField("firstName");
+    $lastName = GetPostField("lastName");
+    $email = GetPostField("email");
+    $major = GetPostField("major");
+    $bio = GetPostField("bio");
+    if(!empty($email)){
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)){
+            echo "invalid_email";
+            return;
+        }
+        $sql = "SELECT email FROM users WHERE student_id = ?";
+        $stmt = mysqli_prepare($link, $sql);
+        mysqli_stmt_bind_param($stmt, "s", $_SESSION["id"]);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_store_result($stmt);
+        if(mysqli_stmt_num_rows($stmt) == 1){
+            echo "email_used";
+            return;
+        }
+        $sql = "UPDATE users SET email = ? WHERE student_id = ?;";
+        $stmt = mysqli_prepare($link, $sql);
+        mysqli_stmt_bind_param($stmt, "ss", $email, $_SESSION["id"]);
+        mysqli_stmt_execute($stmt);
+    }
+    if(!empty($firstName)){
+        $sql = "UPDATE users SET firstName = ? WHERE student_id = ?;";
+        $stmt = mysqli_prepare($link, $sql);
+        mysqli_stmt_bind_param($stmt, "ss", $firstName, $_SESSION["id"]);
+        mysqli_stmt_execute($stmt);
+    }
+    if(!empty($lastName)){
+        $sql = "UPDATE users SET lastName = ? WHERE student_id = ?;";
+        $stmt = mysqli_prepare($link, $sql);
+        mysqli_stmt_bind_param($stmt, "ss", $lastName, $_SESSION["id"]);
+        mysqli_stmt_execute($stmt);
+    }
+    if(!empty($major)){
+        $sql = "UPDATE users SET branch = ? WHERE student_id = ?;";
+        $stmt = mysqli_prepare($link, $sql);
+        mysqli_stmt_bind_param($stmt, "ss", $major, $_SESSION["id"]);
+        mysqli_stmt_execute($stmt);
+    }
+    if(!empty($bio)){
+        $sql = "UPDATE users SET bio = ? WHERE student_id = ?;";
+        $stmt = mysqli_prepare($link, $sql);
+        mysqli_stmt_bind_param($stmt, "ss", $bio, $_SESSION["id"]);
+        mysqli_stmt_execute($stmt);
+    }
+    if(isset($_FILES['file'])){
+        $file_tmppath = $_FILES['file']['tmp_name'];
+        $timestamp = time();
+        $file_path = 'img/avatars/'.$timestamp.'/'.$_FILES['file']['name'];
+        mkdir('img/avatars/'.$timestamp);
+        CutImage($file_tmppath,$file_path);
+        $sql = "SELECT avatarSrc FROM users WHERE student_id = ?;";
+        $stmt = mysqli_prepare($link, $sql);
+        mysqli_stmt_bind_param($stmt, "s", $_SESSION["id"]);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_store_result($stmt);
+        mysqli_stmt_bind_result($stmt, $oldAvatar);
+        mysqli_stmt_fetch($stmt);
+        if($oldAvatar != "img/avatars/default.jpg"){
+            unlink($oldAvatar);
+        }
+        $sql = "UPDATE users SET avatarSrc = ? WHERE student_id = ?;";
+        $stmt = mysqli_prepare($link, $sql);
+        mysqli_stmt_bind_param($stmt, "ss", $file_path, $_SESSION["id"]);
+        mysqli_stmt_execute($stmt);
+    }
+}
 ?>
