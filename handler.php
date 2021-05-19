@@ -60,6 +60,41 @@ if(CheckPostSet("content_field")){
     $post = new Post($post_id, $_SESSION["id"]);
     echo $post->printPost();
 }
+if(CheckPostSet("announcement_field")){
+    $admins = array();
+    $sql = "SELECT admin_id FROM admin;";
+    $stmt = mysqli_prepare($link, $sql);
+    echo mysqli_error($link);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_bind_result($stmt, $row);
+    while(mysqli_stmt_fetch($stmt)) {
+        $admins[] = $row;
+    }
+    if(!in_array($_SESSION["id"], $admins)) {
+        echo "<script> alert(\"An error occurred.\");";
+        return;
+    }
+    $announcement_field = GetPostField("announcement_field");
+    if(isset($_FILES['file'])){
+        $file_tmppath = $_FILES['file']['tmp_name'];
+        $timestamp = time();
+        $file_path = 'img/content/'.$timestamp.'/'.$_FILES['file']['name'];
+        mkdir('img/content/'.$timestamp);
+        CompressImage($file_tmppath,$file_path);
+    } else {
+        $file_path = "";
+    }
+    $sql = "
+    INSERT INTO announcements(announcer_id, announcement, image)
+    VALUES(?, ?, ?);
+    ";
+    $stmt = mysqli_prepare($link, $sql);
+    mysqli_stmt_bind_param($stmt, "sss", $_SESSION["id"], $announcement_field, $file_path);
+    mysqli_stmt_execute($stmt);
+    $announcement_id = mysqli_insert_id($link);
+    $announcement = new Announcement($announcement_id, $_SESSION["id"]);
+    echo $announcement->PrintAnnouncement();
+}
 if(CheckPostSet("comment_sent")){
     $comment_field = GetPostField("comment_field");
     $post_id = GetPostField("post_id");
@@ -78,8 +113,19 @@ if(CheckPostSet("delete_comment_id")){
     $comment_id = GetPostField("delete_comment_id");
     $comment = new Comment($comment_id);
     if($comment->commenter->student_id !== $_SESSION["id"]){
-        echo 'unauthorized';
-        return;
+        $admins = array();
+        $sql = "SELECT admin_id FROM admin;";
+        $stmt = mysqli_prepare($link, $sql);
+        echo mysqli_error($link);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_bind_result($stmt, $row);
+        while(mysqli_stmt_fetch($stmt)) {
+            $admins[] = $row;
+        }
+        if(!in_array($_SESSION["id"], $admins)) {
+            echo 'unauthorized';
+            return;
+        }
     }
     $sql = "
     DELETE FROM comments WHERE id = ?;
@@ -92,8 +138,19 @@ if(CheckPostSet("delete_post_id")){
     $post_id = GetPostField("delete_post_id");
     $post = new Post($post_id, $_SESSION["id"]);
     if($post->poster->student_id !== $_SESSION["id"]){
-        echo 'unauthorized';
-        return;
+        $admins = array();
+        $sql = "SELECT admin_id FROM admin;";
+        $stmt = mysqli_prepare($link, $sql);
+        echo mysqli_error($link);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_bind_result($stmt, $row);
+        while(mysqli_stmt_fetch($stmt)) {
+            $admins[] = $row;
+        }
+        if(!in_array($_SESSION["id"], $admins)) {
+            echo 'unauthorized';
+            return;
+        }
     }
     //If image is ever a folder somehow, do not delete.
     if(!is_dir($post->image)){
@@ -110,6 +167,32 @@ if(CheckPostSet("delete_post_id")){
     ";
     $stmt = mysqli_prepare($link, $sql);
     mysqli_stmt_bind_param($stmt, "s", $post_id);
+    mysqli_stmt_execute($stmt);
+}
+if(CheckPostSet("delete_announcement_id")){
+    $admins = array();
+    $sql = "SELECT admin_id FROM admin;";
+    $stmt = mysqli_prepare($link, $sql);
+    echo mysqli_error($link);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_bind_result($stmt, $row);
+    while(mysqli_stmt_fetch($stmt)) {
+        $admins[] = $row;
+    }
+    if(!in_array($_SESSION["id"], $admins)) {
+        echo 'unauthorized';
+        return;
+    }
+    $id = GetPostField("delete_announcement_id");
+    $announcement = new Announcement($id);
+    if(!is_dir($announcement->image)){
+        unlink($announcement->image);
+    }
+    $sql = "
+    DELETE FROM announcements WHERE id = ?;
+    ";
+    $stmt = mysqli_prepare($link, $sql);
+    mysqli_stmt_bind_param($stmt, "s", $id);
     mysqli_stmt_execute($stmt);
 }
 if(CheckPostSet("friend_request_id")){

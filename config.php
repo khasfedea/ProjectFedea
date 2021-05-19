@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS friendship(
 );
 ",
 "
-create table if not exists friendship_req(
+CREATE TABLE IF NOT EXISTS friendship_req(
     id int not null primary key auto_increment,
     target VARCHAR(50) not null,
     destination VARCHAR(50) not null
@@ -66,10 +66,24 @@ FOR EACH ROW
 INSERT INTO friendship(firstUser, friendedUser) VALUES(NEW.student_id, NEW.student_id);
 ",
 "
+CREATE TABLE IF NOT EXISTS admin(
+id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+admin_id VARCHAR(50) NOT NULL UNIQUE);
+",
+"
 CREATE TABLE IF NOT EXISTS posts(
     id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     poster_id VARCHAR(50) NOT NULL,
     post VARCHAR(500) NOT NULL,
+    image VARCHAR(255) NULL,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+",
+"
+ CREATE TABLE IF NOT EXISTS announcements(
+    id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    announcer_id VARCHAR(50) NOT NULL,
+    announcement VARCHAR(500) NOT NULL,
     image VARCHAR(255) NULL,
     timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
 );

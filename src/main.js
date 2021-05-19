@@ -57,6 +57,28 @@ function postStatus(){
         }
     });
 }
+function postAnnouncement(){
+    announcementText = document.getElementById("announcementText").value;
+    if(announcementText.length === 0) return;
+    var form_data = new FormData();
+    var announcementPicture = $('#announcementPicture').prop('files')[0];
+    form_data.append('file', announcementPicture);
+    form_data.append('announcement_field', announcementText);
+    $.ajax({
+        url: 'handler.php',
+        dataType: 'text',
+        cache: false,
+        contentType: false,
+        processData: false,
+        data: form_data,
+        type: 'post',
+        success: function(response){
+            $(response).insertAfter('.post-window');
+            document.getElementById("announcementText").value = "";
+            document.getElementById("announcementPicture").value = "";
+        }
+    });
+}
 function modifySettings(){
     var form_data = new FormData();
     var postPicture = $('.changeAvatar').prop('files')[0];
@@ -173,6 +195,22 @@ function deletePost(id){
     $.post("handler.php",
     {
         delete_post_id: id
+    },
+    function(data, status){
+        if([data] == 'unauthorized'){
+            alert("You are not allowed to do that.");
+        } else {
+            $("#"+id+".post").remove();
+        }
+    });
+}
+function deleteAnnouncement(id){
+    if (!confirm("Are you sure you want to remove this announcement?")){
+        return;
+    }
+    $.post("handler.php",
+    {
+        delete_announcement_id: id
     },
     function(data, status){
         if([data] == 'unauthorized'){

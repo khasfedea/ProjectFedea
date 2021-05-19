@@ -195,7 +195,10 @@ class User {
             echo '<div class="user-portfolio">';
             echo '<div class="portfolio-identification">'.PHP_EOL;
             echo '<img class="big-avatar" src="'.$this->avatarSrc.'"/>'.PHP_EOL;
+            echo '<div class="name-field">';
             echo '<h1>'.$this->firstName.' '.$this->lastName.'</h1>';
+            echo '<h2>'.$this->email.'</h2>';
+            echo '</div>';
             echo '</div>';
             echo '<div class="additional-info">';
             echo '<h3>'.$this->branch.'</h3>';
@@ -209,7 +212,9 @@ class User {
             echo '</div>';
             echo '</div>';
             echo '<div class="friends">';
-            echo '<h2>Friends</h2>';
+            echo '<div class="friend-count">';
+            echo '<h2>Friends</h2><h2>'.(count($this->friends)-1).'</h2>';
+            echo '</div>';
             foreach($this->friends as $friend_id){
                 if ($friend_id == $this->student_id){
                     continue;
@@ -264,6 +269,7 @@ class Comment {
     public $commenter;
     public $comment;
     public $timestamp;
+    public $admins;
 
     public function __construct($id){
         global $link;
@@ -276,6 +282,15 @@ class Comment {
         mysqli_stmt_bind_result($stmt, $this->post_id, $this->commenter, $this->comment, $this->timestamp);
         mysqli_stmt_fetch($stmt);
         $this->commenter = new User($this->commenter, $_SESSION["id"]);
+        $this->admins = array();
+        $sql = "SELECT admin_id FROM admin;";
+        $stmt = mysqli_prepare($link, $sql);
+        echo mysqli_error($link);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_bind_result($stmt, $row);
+        while(mysqli_stmt_fetch($stmt)) {
+            $this->admins[] = $row;
+        }
     }
     public function getLikeCount(){
         global $link;
@@ -333,10 +348,63 @@ class Comment {
         echo '<span id="like-comment-'.$this->post_id.'-'.$this->id.'">'.$this->getLikeCount().'</span>'.PHP_EOL;
         echo '<a class="like-button" onclick="likeComment('.$this->post_id.','.$this->id.');">'.$this->GetLikeStatus().'</a>'.PHP_EOL;
         echo '</div>'.PHP_EOL;
-        if($this->commenter->student_id === $_SESSION["id"]){
+        if($this->commenter->student_id === $_SESSION["id"] || in_array($_SESSION["id"], $this->admins)){
             echo '<a class="remove-button" onclick="deleteComment('.$this->id.','.$this->post_id.')">Delete</a>'.PHP_EOL;
         }
         echo '</div>'.PHP_EOL.'</div>'.PHP_EOL.'</div>'.PHP_EOL;
+    }
+}
+class Announcement {
+    public $id;
+    public $announcer;
+    public $announcement;
+    public $image;
+    public $timestamp;
+    public $admins;
+
+    public function __construct($id){
+        global $link;
+        $this->id = $id;
+        $sql = "SELECT announcer_id, announcement, image, DATE_FORMAT(timestamp, '%e %b, %H:%i') FROM announcements WHERE id = ?;";
+        $stmt = mysqli_prepare($link, $sql);
+        mysqli_stmt_bind_param($stmt, "s", $id);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_store_result($stmt);
+        mysqli_stmt_bind_result($stmt, $this->announcer, $this->announcement, $this->image, $this->timestamp);
+        mysqli_stmt_fetch($stmt);
+        $this->announcer = new User($this->announcer, $_SESSION["id"]);
+        $this->admins = array();
+        $sql = "SELECT admin_id FROM admin;";
+        $stmt = mysqli_prepare($link, $sql);
+        echo mysqli_error($link);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_bind_result($stmt, $row);
+        while(mysqli_stmt_fetch($stmt)) {
+            $this->admins[] = $row;
+        }
+    }
+    public function PrintAnnouncement(){
+        global $link;
+        echo '<div class="post" id="'.$this->id.'">'.PHP_EOL;
+        echo '<div class="poster">'.PHP_EOL;
+        echo '<div class="identification">'.PHP_EOL;
+        echo '<img class="avatar" src="'.$this->announcer->avatarSrc.'"/>'.PHP_EOL;
+        echo '<a class="name" onclick="GoToUser(\''.$this->announcer->student_id.'\')">'.$this->announcer->firstName.' '.$this->announcer->lastName.'</a>'.PHP_EOL;
+        echo '</div>'.PHP_EOL;
+        echo '<span class="timestamp">'.$this->timestamp.'</span>'.PHP_EOL;
+        echo '</div>'.PHP_EOL;
+        echo '<div class="content">'.PHP_EOL.'<p>';
+        echo $this->announcement.'</p>'.PHP_EOL;
+        if(!empty($this->image)){
+            echo '<img class="content-image" src="'.$this->image.'"/>'.PHP_EOL;
+        }
+        if(in_array($_SESSION["id"], $this->admins)){
+            echo '<div class="under-post">';
+            echo '<a class="remove-button" onclick="deleteAnnouncement('.$this->id.')">Delete</a>'.PHP_EOL;
+            echo '</div>';
+        }
+        echo '</div>'.PHP_EOL;
+        echo '</div>'.PHP_EOL;
     }
 }
 class Post {
@@ -346,6 +414,7 @@ class Post {
     public $image;
     public $timestamp;
     public $comments;
+    public $admins;
 
     public function __construct($id, $issuer){
         global $link;
@@ -354,13 +423,10 @@ class Post {
         $stmt = mysqli_prepare($link, $sql);
         mysqli_stmt_bind_param($stmt, "s", $id);
         mysqli_stmt_execute($stmt);
-        echo mysqli_error($link);
         mysqli_stmt_store_result($stmt);
         mysqli_stmt_bind_result($stmt, $this->poster, $this->post, $this->image, $this->timestamp);
         mysqli_stmt_fetch($stmt);
         $this->poster = new User($this->poster, $issuer);
-
-        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
         $this->comments = array();
         $comment_ids = array();
         $sql = "SELECT id FROM comments WHERE post_id = ?;";
@@ -373,6 +439,15 @@ class Post {
         }
         foreach($comment_ids as $comment_id){
             $this->comments[] = new Comment($comment_id);
+        }
+        $this->admins = array();
+        $sql = "SELECT admin_id FROM admin;";
+        $stmt = mysqli_prepare($link, $sql);
+        echo mysqli_error($link);
+        mysqli_stmt_execute($stmt);
+        mysqli_stmt_bind_result($stmt, $row);
+        while(mysqli_stmt_fetch($stmt)) {
+            $this->admins[] = $row;
         }
     }
     public function getLikeCount(){
@@ -439,7 +514,7 @@ class Post {
         echo '<span id="comment-count-'.$this->id.'">'.$this->getCommentCount().'</span>'.PHP_EOL;
         echo '<a class="comment-button" onclick="showComments('.$this->id.');">Comments</a>'.PHP_EOL;
         echo '</div>'.PHP_EOL;
-        if($this->poster->student_id === $_SESSION["id"]){
+        if($this->poster->student_id === $_SESSION["id"] || in_array($_SESSION["id"], $this->admins)){
             echo '<a class="remove-button" onclick="deletePost('.$this->id.')">Delete</a>'.PHP_EOL;
         }
         echo '</div>'.PHP_EOL.'</div>'.PHP_EOL.'<div class="messages" id="comment-section-'.$this->id.'">'.PHP_EOL;
@@ -491,6 +566,28 @@ function PostThePosts($issuer_id){
         });
         foreach($posts as $post){
             $post->printPost();
+        }
+    }
+}
+function PrintAnnouncements(){
+    global $link;
+    $announcement_ids = array();
+    $sql = "SELECT id FROM announcements;";
+    $stmt = mysqli_prepare($link, $sql);
+    mysqli_stmt_execute($stmt);
+    mysqli_stmt_bind_result($stmt, $row);
+    while(mysqli_stmt_fetch($stmt)) {
+        $announcement_ids[] = $row;
+    }
+    if(!empty($announcement_ids)){
+        foreach($announcement_ids as $announcement_id){
+            $announcements[] = new Announcement($announcement_id);
+        }
+        usort($announcements, function($a, $b) {
+            return $b->id <=> $a->id;
+        });
+        foreach($announcements as $announcement){
+            $announcement->PrintAnnouncement();
         }
     }
 }

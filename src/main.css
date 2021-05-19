@@ -17,9 +17,14 @@ body {
     padding: 0.5em;
     box-sizing: border-box;
     overflow-x: hidden;
-    width: 75%;
+    width: 70%;
     min-height: 100vh;
     background-color: rgb(217, 236, 255);
+}
+@media screen and (min-width: 1550px){
+    body {
+        width: 60%;
+    }
 }
 .login-container {
     padding-bottom: 10rem;
@@ -132,7 +137,21 @@ body {
     padding: 15px;
     float: right;
 }
-
+.content-image {
+    max-height: 500px;
+    max-width: 100%;
+}
+@media screen and (max-width: 800px){
+    .content-image {
+        width: 100%;
+        max-height: none;
+    }
+}
+@media screen and (min-width: 1450px) {
+    .search-form{
+        min-width: 250px;
+    }
+}
 @media screen and (max-width: 1250px) {
     .header, .login-header {
         border-radius: 5px;
@@ -157,24 +176,14 @@ body {
     .login-container {
         flex-direction: column;
     }
-    .content-image {
-        width: 100%;
-    }
 }
-@media screen and (orientation: landscape) {
+@media screen and (min-width: 1250px) {
     .profile-button-dropdown:hover .dropdown-element {
         display: block;
         position: absolute;
         border-radius: 0;
         top: 40px;
         z-index: 1;
-    }
-    .search-form {
-        min-width: 250px;
-    }
-    .content-image {
-        max-height: 500px;
-        max-width: 100%;
     }
     .profile-button-dropdown:hover #settings {
         top: 85px;
@@ -483,6 +492,9 @@ p {
     .portfolio-identification h1{
         font-size: 1.25em;
     }
+    .portfolio-identification h2{
+        font-size: 1em;
+    }
     .big-avatar {
         width: 100px;
     }
@@ -513,4 +525,16 @@ p {
     .settings div input, .settings div textarea {
         width: 50%;
     }
+}
+.friend-count {
+    display: flex;
+    justify-content: space-around;
+}
+.name-field {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.name-field * {
+    margin: 0.2em;
 }
