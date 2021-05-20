@@ -13,6 +13,9 @@ html {
 .user-portfolio .portfolio-identification {
     word-break: break-all;
 }
+.footer-additional-link {
+    color: rgb(255, 127, 53) !important;
+}
 body {
     margin: 0 auto;
     display: flex;
@@ -620,7 +623,7 @@ p {
     border-radius: 5px;
     padding: 0.5em;
     margin: 0.25em;
-    width: 50%;
+    width: 70%;
     word-break: break-all;
 }
 .sent {
